@@ -3,7 +3,7 @@ session "ITree_Security" = "ITree_UTP" +
   sessions
    "Datatype_Order_Generator" 
  theories
-    FSnat
+    FSNat
     CSP_operators
     Sec_Messages
     Sec_Animation
