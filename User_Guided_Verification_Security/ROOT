@@ -1,0 +1,27 @@
+session "ITree_Security" = "ITree_UTP" +
+  options [timeout = 600, document = pdf, document_output = "output"]
+  sessions
+   "Datatype_Order_Generator" 
+ theories
+    FSnat
+    CSP_operators
+    Sec_Messages
+    Sec_Animation
+
+session "DHv2" in "Diffie_Hellman/DH_v2" = "ITree_Security" +
+  options [timeout = 600, document = pdf, document_output = "output"]
+  sessions
+    "ITree_Security"
+    "ITree_Simulation"
+  theories
+    DH 
+    BADH
+
+session "NSPKPv2" in "NSPKP/NSPK3_v2" = "ITree_Security" +
+  options [timeout = 600, document = pdf, document_output = "output"]
+  sessions
+    "ITree_Security"
+    "ITree_Simulation"
+  theories
+    NSPK3
+    NSLPK3
