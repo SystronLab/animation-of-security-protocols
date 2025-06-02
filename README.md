@@ -1,6 +1,6 @@
 **User-Guided Verification of Security Protocols via Sound Animation**
 
-This repository contains our work to use sound animation (automatically generated from Isabelle/HOL) to verify security protocols.
+This repository contains our work to use sound animation (automatically generated from Isabelle/HOL) to verify two security protocols, as presented in our SEFM2024 paper: ["User-Guided Verification of Security Protocols via Sound Animation"](https://doi.org/10.1007/978-3-031-77382-2_3).
 
 - [What's included in the repo?](#whats-included-in-the-repo)
 - [How to load theories in Isabelle/HOL and generate Haskell code?](#how-to-load-theories-in-isabellehol-and-generate-haskell-code)
