@@ -352,6 +352,7 @@ abbreviation "NSWJ3_active' eve \<equiv> if Eve1 = Eve2 then NSWJ3_active eve el
 definition "NSWJ3_active_eve1 = NSWJ3_active' Eve1"
 definition "NSWJ3_active_eve2 = NSWJ3_active' Eve2"
 definition "NSWJ3_active_eve3 = NSWJ3_active' Eve3"
+definition "NSWJ3_active_eve4 = NSWJ3_active' Eve4"
 animate_sec NSWJ3_active_eve2
 
 (*
@@ -420,6 +421,7 @@ in a file is allow. \<close>
 definition "NSWJ3_passive_eve1 = NSWJ3_passive Eve1"
 definition "NSWJ3_passive_eve2 = NSWJ3_passive Eve2"
 definition "NSWJ3_passive_eve3 = NSWJ3_passive Eve3"
-animate_sec NSWJ3_passive_eve1
+definition "NSWJ3_passive_eve4 = NSWJ3_passive Eve4"
+animate_sec NSWJ3_passive_eve4
 
 end
