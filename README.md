@@ -103,7 +103,7 @@ Additionally, we modelled and verified one variant of NSPK3 (NSWJ3) and one vari
 + [DHWJ](./User_Guided_Verification_Security/Diffie_Hellman/DH_wbplsec_v3/DH_wbplsec.thy)
 + [NSWJ3](./User_Guided_Verification_Security/NSPKP/NSPK3_wbplsec_v3/NSWJ3_wbplsec.thy)
 
-We found DHWJ and NSWJ3 preserve confidentiality and authenticity if the PLS is properly set up (to ensure eavesdroppers within the jamming ranges of legitimate receivers, for example, through visible light communication, VLC, and reconfigurable intelligent interface, RIS, to restrict spatially or direct signals) though the original NSPK3 and classic DH are subject to the man-in-the-middle attack. Our work suggests PLS can be integrated with the traditional cryptography to provide flexible and lightweight security.
+We found DHWJ and NSWJ3 preserve confidentiality and authenticity if the PLS is properly set up (to ensure eavesdroppers within the jamming ranges of legitimate receivers, for example, through visible light communication, VLC, and reconfigurable intelligent interface, RIS, to restrict spatially within walls or direct signals) though the original NSPK3 and classic DH are subject to the man-in-the-middle attack. Our work suggests PLS can be integrated with the traditional cryptography to provide flexible and lightweight security.
 
 
 # How to load theories in Isabelle/HOL and generate Haskell code?
