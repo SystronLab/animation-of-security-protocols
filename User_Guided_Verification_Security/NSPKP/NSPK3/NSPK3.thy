@@ -263,7 +263,7 @@ definition "Events_A_B_I =
 definition NSPK3 where
 "NSPK3 = (PAlice \<parallel>\<^bsub> set terminate_event \<^esub> PBob)  \<parallel>\<^bsub> Events_A_B_I \<^esub>  PIntruder"
 
-(* animate_sec NSPK3 *)
+animate_sec NSPK3
 
 (*
 Expected trace: 
@@ -324,7 +324,7 @@ definition "LA_I_snd_msg A na = (let Bs = removeAll A AllAgents
 
 value "LA_I_snd_msg Alice (N Alice)"
 
-definition "LA_I_snd_event A na = [send_C m. m \<leftarrow> LA_I_snd_msg A na]"
+definition "LA_I_snd_event A na = [send_C m. m \<leftarrow> A_I_snd_msg A na]"
 
 definition "LA_I_rcv_msg A na = (
     \<comment> \<open> Msg2 \<close>

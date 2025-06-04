@@ -1,6 +1,6 @@
 section \<open> Modelling, verification, and animation of security protocols \<close>
 theory DH_message
-  imports "../CSP_operators"
+  imports "../../CSP_operators"
           "Datatype_Order_Generator.Order_Generator"
 begin
 
