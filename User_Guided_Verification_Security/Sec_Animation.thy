@@ -75,6 +75,8 @@ printFP (FP x) = case (read x) of
   (Leak_C d) -> "Leak " ++ ppMsg d ;
   (Sig_C d) -> "Sig " ++ ppSig d ;
   (Terminate_C _) -> "Terminate";
+  (Cjam_C m) -> "Error: Jam events are internal and should be properly hidden: \n\t" ++ ppMsg m;
+  (Cdejam_C m) -> "Error: Dejam events are internal and should be properly hidden: \n\t" ++ ppMsg m;
 
 ppMsg :: Dmsg a b c d e f g -> String
 ppMsg (MAg a) = ppAgent a; 
@@ -143,6 +145,11 @@ showTrace (t:ts) = (printFP (FP (Prelude.show t))) ++ ", " ++ showTrace ts;
 
 ppTrace e = "[" ++ showTrace e ++ "]"
 ppTraceApp e estr = "[" ++ showTrace e ++ estr ++ "]"
+
+containEvents :: (Prelude.Show e) => [e] -> [String] -> Bool
+containEvents [] _ = False
+containEvents _ [] = False
+containEvents ts evs = Prelude.any (\e -> Prelude.elem (printFP (FP (Prelude.show e))) evs) ts
 
 -- %er1;er2;...%
 format_events :: String -> [String]
@@ -266,8 +273,15 @@ simulate_cnt n t@(Vis (Pfun_of_alist m)) mod steps re me tr =
                   let reached = ppList (Data.List.intersect events re);
                       monitored = Data.List.intersect events me;
                     in if reached /= [] then do {
-                      Prelude.putStrLn ("*** These events [" ++ reached ++ "] are reached! ***" ++ "\nTrace: " ++ (ppTraceApp tr reached));
-                      Prelude.putStrLn ("");
+                      if containEvents tr me then do{
+                        Prelude.putStrLn ("*** These events [" ++ reached ++ "] are reached! ***" ++ "\nTrace: " ++ (ppTraceApp tr reached));
+                        Prelude.putStrLn ("");
+                      }
+                      else do {
+                        Prelude.putStrLn ("*** These events [" ++ reached ++ "] are reached but no monitored events " ++ (show me) ++ "in the trace! ***" ++ "\nTrace: " ++ (ppTraceApp tr reached));
+                        -- hPutStr stderr ("*** These events [" ++ reached ++ "] are reached but no monitored events " ++ (show me) ++ "in the trace! ***" ++ "\nTrace: " ++ (ppTraceApp tr reached) ++ "\n");
+                        Prelude.putStrLn ("");
+                      }
                     }
                     else do {
                       if monitored /= [] then 
@@ -291,8 +305,15 @@ simulate_cnt n t@(Vis (Pfun_of_alist m)) mod steps re me tr =
                   let reached = ppList (Data.List.intersect events re);
                       monitored = Data.List.intersect events me;
                     in if reached /= [] then do {
-                      Prelude.putStrLn ("*** These events [" ++ reached ++ "] are reached! ***" ++ "\nTrace: " ++ (ppTraceApp tr reached));
-                      Prelude.putStrLn ("");
+                      if containEvents tr me then do {
+                        Prelude.putStrLn ("*** These events [" ++ reached ++ "] are reached! ***" ++ "\nTrace: " ++ (ppTraceApp tr reached));
+                        Prelude.putStrLn ("");
+                      }
+                      else do {
+                        Prelude.putStrLn ("*** These events [" ++ reached ++ "] are reached but no monitored events " ++ (show me) ++ "in the trace! ***" ++ "\nTrace: " ++ (ppTraceApp tr reached));
+                        -- hPutStr stderr ("*** These events [" ++ reached ++ "] are reached but no monitored events " ++ (show me) ++ "in the trace! ***" ++ "\nTrace: " ++ (ppTraceApp tr reached) ++ "\n");
+                        Prelude.putStrLn ("");
+                      }
                     }
                     else do {
                        if monitored /= [] then 
