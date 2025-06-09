@@ -1,0 +1,152 @@
+<div .container>
+    <!-- Needham-Schroeder Public-Key Protocol ================================================== -->
+    <div .bs-docs-section>
+        <div .row>
+            <div .col-lg-12>
+                <div .page-header>
+                    <h1> Needham-Schroeder Public-Key Protocol: Simplified Protocol (3-Message Version)
+                   
+                    <p> A fixing for the man-in-the-middle attack in the ooriginal SPK3 protocol 
+                        This fixing is described in Gavin Lowe's paper, "Breaking and fixing the Needham-Schroeder Public-Key Protocol using FDR".
+
+                    <p>
+                        ^{nslpk3_diagram}
+
+                    <hr>
+                    <h2> Properties 
+                    <ul .list-group>
+                        <li .list-group-item>
+                            <tt>Secrecy</tt>: The nonces used by Alice and Bob to establish the session are kept secret. 
+
+                        <li .list-group-item>
+                            <tt>Authenticity</tt>: The authenticity of the protocol is maintained in terms of both Alice and Bob.
+
+                    <hr>
+                    <h2> No man-in-the-middle attack 
+                    <p>
+                       The well-known man-in-the-middle attack, due to Lowe (1995), is illustrated below. Intruder establishes a session in the middle of the conversation 
+                       between Alice and Bob, and fools Bob into thinking that its counterpart is Alice. In this case, both secrecy and authenticity are violated because 
+                       the intruder gets to know the nonce nb (of Bob) after receiving Message 5.
+
+                    ^{nslpk3_diagram_no_attack}
+
+    <hr>
+    <!-- Forms: Manual Animation ================================================== -->
+    <div .bs-docs-section>
+        <div .row>
+            <div .col-lg-12>
+                <div .page-header>
+                    <h1 #animation_forms> Manual Animation
+
+                    <p>
+                        A table below shows all available events and you can choose one to animate.
+
+                <div .table-responsive>
+                    <table .table.table-striped>
+                        <thead>
+                            <tr>
+                                <th>
+                                    No. 
+                                <th>
+                                    EventID 
+                                <th>
+                                    Channel
+                                <th>
+                                    Source
+                                <th>
+                                    Dest
+                                <th>
+                                    Message 
+                        <tbody>
+                            $forall (id, (eventid, channel, source, destination, message)) <- allEvents
+                                <tr>
+                                    <td>#{id}
+                                    <td>#{eventid}
+                                    <td>#{channel}
+                                    <td>#{source}
+                                    <td>#{destination}
+                                    <td>#{message}
+                                    
+        <div .row>
+            <div .col-lg-3>
+                <div .bs-callout bs-callout-info well>
+                    <form .form-horizontal method=post action=@{AnimateNSLPK3R}#animation_forms enctype=#{manFormEnctype}>
+                        ^{manFormWidget}
+
+                        <button .btn.btn-primary type="animate">
+                            Animate it. 
+
+            <div .col-lg-2.col-lg-offset-1>
+                <div .bs-callout bs-callout-info well>
+                    <form .form-horizontal method=post action=@{AnimateNSLPK3ResetR}#animation_forms>
+
+                        <button .btn.btn-primary type="submit">
+                            Reset. 
+            <!-- 
+            <div .col-lg-4.col-lg-offset-1>
+                <div .bs-callout.bs-callout-info.upload-response>
+
+                    $maybe (manualinputform) <- submission
+                        The selected event id is <b>#{fst5 $ manualSelectedEventId manualinputform}</b>. 
+
+                    $nothing
+                        Nothing selected. 
+            -->
+            
+        <div .row>
+            <div .col-lg-12>
+                <div .bs-callout.bs-callout-info.well>
+                    ^{diagram}
+                        
+    <hr>
+
+    <!-- Forms: Automatic Animation ================================================== -->
+    <div .bs-docs-section>
+        <div .row>
+            <div .col-lg-12>
+                <div .page-header>
+                    <h1 #automatic_animation> Automatic checking based on the animated trace (above)
+
+                    <p>  
+        <div .row>
+            <div .col-lg-9>
+                <div .bs-callout bs-callout-info well>
+                    <form .form-horizontal method=post action=@{AnimateNSLPK3AutoR} enctype=#{autoFormEnctype}>
+                        ^{autoFormWidget}
+
+            <div .col-lg-12>
+                <div .bs-callout bs-callout-info well>
+                    <dt>Counterexamples
+
+                    <dd>
+                      $if null autoRes 
+                        -- no counterexamples found --
+                      $else
+                        <table .table .counterexamples>
+                          <thead>
+                            <tr>
+                              <td> No. 
+                              <td> Trace
+                              <td> View sequence diagram
+                          <tbody>
+                            $forall (id, eventList) <- autoRes 
+                              <tr>
+                                <td> #{show id}
+                                <td> #{show eventList}
+                                <td>
+                                  <form method=POST action=@{ViewNSLPK3CounterExampleR id}>
+                                    <button .btn .btn-info type=submit>
+                                      View diagram #
+                                      <i .glyphicon .glyphicon-refresh>
+        <div .row>
+            <div .col-lg-12>
+                <div .page-header>
+                    <h1 #counterexample> Counterexamples
+
+                    <p>  
+                <div .bs-callout.bs-callout-info.well>
+                    ^{counterexample_diagram}
+                    
+    <div id="sidebar">
+        <a href="#top" id="back-to-top">Back to Top</a>
+    <hr>

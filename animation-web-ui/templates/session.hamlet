@@ -1,0 +1,49 @@
+<div .container>
+    <!-- Forms: Session ================================================== -->
+    <div .bs-docs-section>
+        <div .row>
+            <div .col-lg-8>
+                <div .page-header>
+                    <h1 #forms> Session information 
+
+                    <dt>Session ID
+                    <dd>#{maybe "-- no session --" id msid}
+
+        <div .row>
+            <div .col-lg-12>
+                <div .bs-callout bs-callout-info well>
+                    <dt>Session variables
+
+                    <dd>
+                      $if null vars
+                        -- no session variables --
+                      $else
+                        <table .table .session-vars>
+                          <thead>
+                            <tr>
+                              <td>Key
+                              <td>Value
+                              <td>
+                                  <form method=POST action=@{SessionClearR}>
+                                    <button .btn .btn-danger type=submit>
+                                      Clear all #
+                                      <i .glyphicon .glyphicon-trash>
+                          <tbody>
+                            $forall (key, val) <- vars
+                              <tr>
+                                <td>#{show key}
+                                <td>#{show val}
+                                <td>
+                                  <form method=POST action=@{SessionDeleteR key}>
+                                    <button .btn .btn-danger type=submit>
+                                      Delete #
+                                      <i .glyphicon .glyphicon-trash>
+
+        <div .row>
+            <div .col-lg-6.col-lg-offset-1>
+                <div .bs-callout bs-callout-info well>
+                    <p>
+                      Adding or modifying session variables
+
+                        <form .form-horizontal method=POST action=@{SessionAddR} enctype=#{sessionAddFormEnctype}>
+                            ^{sessionAddFormWidget}

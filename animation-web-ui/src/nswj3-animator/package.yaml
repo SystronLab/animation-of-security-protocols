@@ -1,0 +1,76 @@
+name:                nswj3-animator
+version:             0.1.0.0
+github:              "RandallYe/nswj3-animator"
+license:             BSD-3-Clause
+author:              "Kangfeng Ye"
+maintainer:          "kangfeng.ye@york.ac.uk"
+copyright:           "2024 Kangfeng Ye"
+
+extra-source-files:
+- README.md
+- CHANGELOG.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/RandallYe/nswj3-animator#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- classy-prelude >=1.5 && <1.6
+- classy-prelude-conduit >=1.5 && <1.6
+- bytestring 
+- text 
+- random
+- pretty-show
+- http-client-tls >=0.3 && <0.4
+- http-conduit >=2.3 && <2.4
+- directory >=1.1 && <1.4
+- data-default
+- unordered-containers
+- containers
+- vector
+- time
+- case-insensitive
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wpartial-fields
+- -Wredundant-constraints
+- -fno-warn-unused-binds 
+- -fno-warn-unused-matches
+
+library:
+  source-dirs: src
+
+executables:
+  nswj3-animator-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - nswj3-animator
+
+tests:
+  nswj3-animator-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - nswj3-animator

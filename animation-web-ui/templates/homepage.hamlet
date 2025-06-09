@@ -1,0 +1,28 @@
+<div .masthead style="min-height: 100px; margin-top: -100px;">
+    <div .container>
+        <div .row>
+            <div .col-lg-12>
+                <div .page-header>
+                    <h2 #top> User-Guided Accessible Verification of Security Protocols via Sound Animation 
+
+<div .container>
+    <!-- Starting
+        ================================================== -->
+    <div .bs-docs-section>
+        <div .row>
+            <div .col-lg-12>
+                <div .page-header>
+                    <p style="text-align: center;">
+                        <img src=@{StaticR images_Cheddar_Logo_png} width=150px alt="Cheddar Logo" class="logo">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <img src=@{StaticR images_UOY_Logo_png} width=200px alt="University of York Logo" class="logo">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <img src=@{StaticR images_EPSRC_logo_png} width=200px alt="EPSRC Logo" class="logo">
+
+                    <ul .list-group>
+                        <li .list-group-item>
+                            The workflow of our approach to User-Guided Accessible Verification of Security Protocols Via Sound Animation is illustrated below.
+                            
+                    <p>
+                        <img src=@{StaticR images_sound_animation_workflow_svg} class="img-responsive" alt="Sound Animation Workflow" >
+
+
+    <hr>

@@ -1,0 +1,68 @@
+-- By default this file is used by `persistFileWith` in Model.hs (which is imported by Foundation.hs)
+-- Syntax for this file here: https://github.com/yesodweb/persistent/blob/master/docs/Persistent-entity-syntax.md
+
+User
+    ident Text
+    password Text Maybe
+    UniqueUser ident
+    deriving Typeable
+Email
+    email Text
+    userId UserId Maybe
+    verkey Text Maybe
+    UniqueEmail email
+Comment json -- Adding "json" causes ToJSON and FromJSON instances to be derived.
+    message Text
+    userId UserId Maybe
+    deriving Eq
+    deriving Show
+NSPK3Trees  -- Protocol event trees
+    protocol Text -- the protocol name 
+    eid Int -- the event unique id
+    depth Int -- the depth in the protocol tree 
+    number Int -- the event number in that depth 
+    parent Int -- the parent event id
+    event NSPK3_Animate.NSPK3_TEvent -- the event
+    UniqueTrees_NSPK3 eid
+    deriving Eq
+    deriving Show
+NSLPK3Trees  -- Protocol event trees
+    protocol Text -- the protocol name 
+    eid Int -- the event unique id
+    depth Int -- the depth in the protocol tree 
+    number Int -- the event number in that depth 
+    parent Int -- the parent event id
+    event NSPK3_Animate.NSLPK3_TEvent -- the event
+    UniqueTrees_NSLPK3 eid
+    deriving Eq
+    deriving Show
+NSWJ3TreesEve1  -- Protocol event trees
+    protocol Text -- the protocol name 
+    eid Int -- the event unique id
+    depth Int -- the depth in the protocol tree 
+    number Int -- the event number in that depth 
+    parent Int -- the parent event id
+    event NSWJ3_Animate.NSWJ3_TEvent -- the event
+    UniqueTrees_NSWJ3Eve1 eid
+    deriving Eq
+    deriving Show
+NSWJ3TreesEve2  -- Protocol event trees
+    protocol Text -- the protocol name 
+    eid Int -- the event unique id
+    depth Int -- the depth in the protocol tree 
+    number Int -- the event number in that depth 
+    parent Int -- the parent event id
+    event NSWJ3_Animate.NSWJ3_TEvent -- the event
+    UniqueTrees_NSWJ3Eve2 eid
+    deriving Eq
+    deriving Show
+NSWJ3TreesEve3  -- Protocol event trees
+    protocol Text -- the protocol name 
+    eid Int -- the event unique id
+    depth Int -- the depth in the protocol tree 
+    number Int -- the event number in that depth 
+    parent Int -- the parent event id
+    event NSWJ3_Animate.NSWJ3_TEvent -- the event
+    UniqueTrees_NSWJ3Eve3 eid
+    deriving Eq
+    deriving Show
