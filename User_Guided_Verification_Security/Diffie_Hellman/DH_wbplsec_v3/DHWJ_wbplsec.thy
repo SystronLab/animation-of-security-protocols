@@ -1,8 +1,8 @@
 section \<open> Animation of the classic Diffie-Hellman that is based on WBPLSec \<close>
-theory DH_wbplsec
+theory DHWJ_wbplsec
   imports "ITree_Simulation.ITree_Simulation"
           "ITree_Security.Sec_Animation"
-          "DH_config"
+          "DHWJ_config"
 begin
 
 definition "watjam m bw bj = {{m}\<^sup>w\<^bsub>bw\<^esub> }\<^sup>j\<^bsub>bj\<^esub> "
@@ -15,6 +15,8 @@ Diffie-Hellman without signatures, Only resists passive attacks
      A and B compute the key as k = (g^x)^y = (g^y)^x
   3. A -> B : {s}k
     We choose the public key of Alice as the secret s
+  4. B -> A : {s}k
+    B sends back the secret s to A
 \<close>
 
 subsection \<open>  DH - Processes \<close>
@@ -48,13 +50,30 @@ definition "all_msg3_agent_send A = [msg3_agent_send A na gy. na \<leftarrow> [(
 text \<open> All the watermarked message 3 that an agent can send \<close>
 definition "all_wm_msg3_agent_send A = [wm_msg3_agent_send A na gy. na \<leftarrow> [(NonceMap(A))], gy \<leftarrow> all_msg12_agent_recv A]"
 
-text \<open> All the messages (1, 2, and 3) that an agent can send \<close>
+text \<open> The message 4 that an agent can send \<close>
+definition msg4_agent_send :: "dmsg => dnonce \<Rightarrow> dmsg \<Rightarrow> dmsg" where 
+"msg4_agent_send mpk nb gx = {mpk}\<^sup>s\<^bsub>gx ^\<^sub>m (MNon nb)\<^esub> "
+
+text \<open> The watermarked message 4 that an agent can send \<close>
+definition wm_msg4_agent_send :: "dagent \<Rightarrow> dmsg => dnonce \<Rightarrow> dmsg \<Rightarrow> dmsg" where 
+"wm_msg4_agent_send B mpk nb gx = MWat (msg4_agent_send mpk nb gx) (mkbma B)"
+
+text \<open> All the message 4 that an agent can send \<close>
+definition "all_msg4_agent_send B = [msg4_agent_send mpk nb gx. 
+  mpk \<leftarrow> AllOtherPKs B, nb \<leftarrow> [(NonceMap(B))], gx \<leftarrow> all_msg12_agent_recv B]"
+
+text \<open> All the watermarked message 4 that an agent can send \<close>
+definition "all_wm_msg4_agent_send B = [wm_msg4_agent_send B mpk nb gx. 
+  mpk \<leftarrow> AllOtherPKs B, nb \<leftarrow> [(NonceMap(B))], gx \<leftarrow> all_msg12_agent_recv B]"
+
+text \<open> All the messages (1, 2, 3, and 4) that an agent can send \<close>
 definition all_msg123_agent_send :: "dagent \<Rightarrow> dmsg list" where
-"all_msg123_agent_send A = [msg12_agent_send A] @ all_msg3_agent_send A"
+"all_msg123_agent_send A = [msg12_agent_send A] @ all_msg3_agent_send A @ all_msg4_agent_send A"
 
-definition "all_wm_msg123_agent_send A = [wm_msg12_agent_send A] @ all_wm_msg3_agent_send A"
+definition "all_wm_msg123_agent_send A = [wm_msg12_agent_send A] @ all_wm_msg3_agent_send A 
+  @ all_wm_msg4_agent_send A"
 
-value "all_wm_msg123_agent_send Bob"
+value "all_wm_msg123_agent_send Alice"
 
 text \<open> All the messages that agents (A) will send and its counterpart (B) will jam \<close>
 definition "all_jm_wm_msg123_agent_send eve = [{m}\<^sup>j\<^bsub>b\<^esub> . (A, B) \<leftarrow> AllCommsAgentsButIntr, 
@@ -64,11 +83,18 @@ value "AllCommsAgentsButIntr"
 value "all_jm_wm_msg123_agent_send Eve1"
 
 text \<open> All the message 3 that an agent can receive \<close>
-definition "all_wm_msg3_agent_recv B nb = [
+definition "all_wm_msg3_agent_recv B = [
     MWat ({MPK A}\<^sup>s\<^bsub>(msg12_agent_send B) ^\<^sub>m (MNon (NonceMap (A)))\<^esub> ) (mkbma A). A \<leftarrow> AllOtherAgents B
     \<^cancel>\<open>s \<leftarrow> AllOtherPKs B, na \<leftarrow> removeAll nb AllNonces', A \<leftarrow> AllOtherAgents B\<close>
-]"               
+]"
 
+text \<open> All the message 4 that an agent can receive \<close>
+definition "all_wm_msg4_agent_recv A = [
+    MWat ({MPK B}\<^sup>s\<^bsub>(msg12_agent_send A) ^\<^sub>m (MNon (NonceMap (C)))\<^esub> ) (mkbma C). B \<leftarrow> AllAgents', 
+    C \<leftarrow> AllOtherAgents A
+]"
+
+value "all_wm_msg4_agent_recv Alice"
 
 text \<open> The received messages could be from a legitimate agent or from the intruder (for example, fake messages) \<close>
 definition rcv_msg :: "dagent \<Rightarrow> dmsg list \<Rightarrow> (dagent \<times> dagent \<times> dagent \<times> dmsg) list" where 
@@ -120,10 +146,27 @@ definition Initiator :: "dagent \<Rightarrow> dnonce \<Rightarrow> (chan, unit) 
       let gy = (mwm (mjm m))
       in
         do {
+          \<comment> \<open> For signal here, we can recover n from g^n. But Intruder cannot learn n from g^n. \<close>
+          outp sig (StartProt A B na (mn (mmek gy)));
           \<comment> \<open> Send Msg3 \<close>
           \<comment> \<open> MKp (PK A) is chosen as a secret, encrypted with (g^b)^a and where g^b = gy \<close>
           outp send (A, Intruder, B, wm_msg3_agent_send A na gy);
-          outp terminate ()
+          \<comment> \<open> Recieve an encrypted message using (g^a)^b as the key \<close>
+          m4' \<leftarrow> inp_in cjam (set ([{m4}\<^sup>j\<^bsub>mkbma A\<^esub> . m4 \<leftarrow> all_wm_msg4_agent_recv A]));
+          let m4 = (mwm (mjm m4')); m4m = msem m4
+          in 
+            \<comment> \<open>If the swap of the key (g^x^y) is equal to (g^y^x), then we can decrypt it to get its 
+              clear message m4m \<close>
+            if (swap_mod_exp (msek m4)) = (gy ^\<^sub>m (MNon na)) then
+              if m4m = MPK A then
+                do {
+                  outp sig (EndProt A B na (mn (mmek gy)));
+                  outp terminate ()
+                }
+              else 
+                Ret ()
+            else 
+              Ret ()
         }
     }
   }
@@ -149,7 +192,7 @@ definition A_snd_events :: "dagent \<Rightarrow> dnonce \<Rightarrow> chan list"
 value "A_snd_events Alice (NonceMap(Alice))"
 
 definition A_rcv_msgs :: "dagent \<Rightarrow> (dagent \<times> dagent \<times> dagent \<times> dmsg) list" where
-"A_rcv_msgs A = rcv_msg A (all_wm_msg12_agent_recv A)"
+"A_rcv_msgs A = rcv_msg A (all_wm_msg12_agent_recv A @ all_wm_msg4_agent_recv A)"
 
 value "A_rcv_msgs Alice"
 
@@ -190,16 +233,26 @@ definition Responder :: "dagent \<Rightarrow> dnonce \<Rightarrow> dagent \<Righ
     let gx = (mwm (mjm m1))
     in
       do {
+        outp sig (StartProt B A (mn (mmek gx)) nb);
         \<comment> \<open> Recieve an encrypted message using (g^a)^b as the key \<close>
-        m3' \<leftarrow> inp_in cjam (set ([{m3}\<^sup>j\<^bsub>mkbma B\<^esub> . m3 \<leftarrow> all_wm_msg3_agent_recv B nb]));
-        let m3 = (mwm (mjm m3'))
+        m3' \<leftarrow> inp_in cjam (set ([{m3}\<^sup>j\<^bsub>mkbma B\<^esub> . m3 \<leftarrow> all_wm_msg3_agent_recv B]));
+        let m3 = (mwm (mjm m3')); m3m = msem m3
         in 
           do {
-            \<comment> \<open> If B can break the message m' to get the secret, it terminates. Otherwise, deadlock \<close>
-            if List.member (breakm [MNon nb, MAg B, ExpG ^\<^sub>m (MNon nb), gx, m3]) 
-                 (MPK A) then 
-              outp terminate ()
-            else Ret ()
+            \<comment> \<open> If B can break the message m' to get the secret, so the session key works. 
+                The protocol terminates. Otherwise, deadlock (due to the later exception). \<close>
+            \<^cancel>\<open>if List.member (breakm [MNon nb, MAg B, ExpG ^\<^sub>m (MNon nb), gx, m3]) 
+                 (MPK A) then\<close>
+            \<comment> \<open>If the swap of the key (g^y^x) is equal to (g^x^y), then we can decrypt it to get its 
+              clear message m3m \<close>
+            if (swap_mod_exp (msek m3)) = (gx ^\<^sub>m (MNon nb)) then
+              do {
+                outp send (B, Intruder, A, wm_msg4_agent_send B m3m nb gx);
+                outp sig (EndProt B A (mn (mmek gx)) nb);
+                outp terminate ()
+              }
+            else 
+              Ret ()
           }
       }
   }
@@ -208,7 +261,8 @@ definition Responder :: "dagent \<Rightarrow> dnonce \<Rightarrow> dagent \<Righ
 definition B_snd_msgs :: "dagent \<Rightarrow> dnonce \<Rightarrow> (dagent \<times> dagent \<times> dagent \<times> dmsg) list" where 
 "B_snd_msgs B nb = (let As = removeAll B AllAgents'
   in
-    [(B, Intruder, A, wm_msg12_agent_send B). A \<leftarrow> As]
+    [(B, Intruder, A, wm_msg12_agent_send B). A \<leftarrow> As] @ 
+    [(B, Intruder, A, m4). A \<leftarrow> As, m4 \<leftarrow> all_wm_msg4_agent_send B]
   )"
 
 value "B_snd_msgs Bob (NonceMap Bob)"
@@ -219,7 +273,7 @@ definition B_snd_events :: "dagent \<Rightarrow> dnonce \<Rightarrow> chan list"
 value "B_snd_events Bob (NonceMap Bob)"
 
 definition B_rcv_msgs :: "dagent \<Rightarrow> dnonce \<Rightarrow> (dagent \<times> dagent \<times> dagent \<times> dmsg) list" where
-"B_rcv_msgs B nb = rcv_msg B (all_wm_msg12_agent_recv B @ all_wm_msg3_agent_recv B nb)"
+"B_rcv_msgs B nb = rcv_msg B (all_wm_msg12_agent_recv B @ all_wm_msg3_agent_recv B)"
 
 value "B_rcv_msgs Bob (NonceMap Bob)"
 
@@ -344,7 +398,7 @@ definition "Events_A_B_I = (set (remdups
 
 value "Events_A_B_I"
 
-definition DHWJ_active where
+definition DHWJ_active where                         
 "DHWJ_active eve = (PAlice \<parallel>\<^bsub> set terminate_event \<^esub> PBob) \<parallel>\<^bsub> Events_A_B_I\<^esub> (PIntruder eve)"
 
 \<comment> \<open> The only purpose of this unnecesssary abbreviation is to call (Eve1 = Eve2) in order to generate 
@@ -356,10 +410,16 @@ definition "DHWJ_active_eve1 = DHWJ_active' Eve1"
 definition "DHWJ_active_eve2 = DHWJ_active' Eve2"
 definition "DHWJ_active_eve3 = DHWJ_active' Eve3"
 definition "DHWJ_active_eve4 = DHWJ_active' Eve4"
-animate_sec DHWJ_active_eve2
+animate_sec DHWJ_active_eve4
 
 (* AReach 15 %Terminate%
    AReach 15 %Leak PK0%
+   AReach 15 %Sig EndProt (A1) (A0) (N0) (N1)% # %Sig StartProt (A0) (A1) (N0) (N1)%
+   AReach 15 %Sig EndProt (A0) (A1) (N0) (N1)% # %Sig StartProt (A1) (A0) (N0) (N1)%
+*)
+
+(* 
+
 *)
 
 end

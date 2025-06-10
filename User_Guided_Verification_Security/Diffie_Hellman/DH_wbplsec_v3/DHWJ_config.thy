@@ -1,5 +1,5 @@
 section \<open> Animation of the Diffie-Hellman with digital signatures \<close>
-theory DH_config
+theory DHWJ_config
   imports "ITree_Security.Sec_Messages"
 begin
 type_synonym max_agents = 2
