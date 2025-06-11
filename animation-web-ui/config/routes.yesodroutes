@@ -22,6 +22,11 @@
 /animate/nswj3/reset AnimateNSWJ3ResetR POST
 /animate/nswj3/#Int/view ViewNSWJ3CounterExampleR POST
 /animate/nswj3/change ChangeNSWJ3ProtocolR POST
+/animate/dhwj AnimateDHWJR GET POST
+/animate/dhwj/auto AnimateDHWJAutoR POST
+/animate/dhwj/reset AnimateDHWJResetR POST
+/animate/dhwj/#Int/view ViewDHWJCounterExampleR POST
+/animate/dhwj/change ChangeDHWJProtocolR POST
 
 -- session
 /session SessionR GET POST

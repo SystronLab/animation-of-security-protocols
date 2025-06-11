@@ -66,3 +66,53 @@ NSWJ3TreesEve3  -- Protocol event trees
     UniqueTrees_NSWJ3Eve3 eid
     deriving Eq
     deriving Show
+NSWJ3TreesEve4  -- Protocol event trees
+    protocol Text -- the protocol name 
+    eid Int -- the event unique id
+    depth Int -- the depth in the protocol tree 
+    number Int -- the event number in that depth 
+    parent Int -- the parent event id
+    event NSWJ3_Animate.NSWJ3_TEvent -- the event
+    UniqueTrees_NSWJ3Eve4 eid
+    deriving Eq
+    deriving Show
+DHWJTreesEve1  -- Protocol event trees
+    protocol Text -- the protocol name 
+    eid Int -- the event unique id
+    depth Int -- the depth in the protocol tree 
+    number Int -- the event number in that depth 
+    parent Int -- the parent event id
+    event DHWJ_Animate.DHWJ_TEvent -- the event
+    UniqueTrees_DHWJEve1 eid
+    deriving Eq
+    deriving Show
+DHWJTreesEve2  -- Protocol event trees
+    protocol Text -- the protocol name 
+    eid Int -- the event unique id
+    depth Int -- the depth in the protocol tree 
+    number Int -- the event number in that depth 
+    parent Int -- the parent event id
+    event DHWJ_Animate.DHWJ_TEvent -- the event
+    UniqueTrees_DHWJEve2 eid
+    deriving Eq
+    deriving Show
+DHWJTreesEve3  -- Protocol event trees
+    protocol Text -- the protocol name 
+    eid Int -- the event unique id
+    depth Int -- the depth in the protocol tree 
+    number Int -- the event number in that depth 
+    parent Int -- the parent event id
+    event DHWJ_Animate.DHWJ_TEvent -- the event
+    UniqueTrees_DHWJEve3 eid
+    deriving Eq
+    deriving Show
+DHWJTreesEve4  -- Protocol event trees
+    protocol Text -- the protocol name 
+    eid Int -- the event unique id
+    depth Int -- the depth in the protocol tree 
+    number Int -- the event number in that depth 
+    parent Int -- the parent event id
+    event DHWJ_Animate.DHWJ_TEvent -- the event
+    UniqueTrees_DHWJEve4 eid
+    deriving Eq
+    deriving Show

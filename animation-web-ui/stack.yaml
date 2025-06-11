@@ -32,6 +32,7 @@ snapshot:
 packages:
 - src/nspk3-animator
 - src/nswj3-animator
+- src/dhwj-animator
 - .
 # Dependency packages to be pulled from upstream that are not in the snapshot.
 # These entries can reference officially published versions as well as

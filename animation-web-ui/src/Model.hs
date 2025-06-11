@@ -27,11 +27,16 @@ import "nswj3-animator" Sec_Messages as NSWJ3_Sec_Messages
 import "nswj3-animator" NSWJ3_wbplsec
 import "nswj3-animator" NSWJ3_Animate 
 
+import "dhwj-animator" Interaction_Trees as DHWJ_Interaction_Trees
+import "dhwj-animator" Sec_Messages as DHWJ_Sec_Messages
+import "dhwj-animator" DHWJ_wbplsec
+import "dhwj-animator" DHWJ_Animate 
 
 -- In order for TEvent to be a persistent entity
 derivePersistField "NSPK3_Animate.NSPK3_TEvent"
 derivePersistField "NSPK3_Animate.NSLPK3_TEvent"
 derivePersistField "NSWJ3_Animate.NSWJ3_TEvent"
+derivePersistField "DHWJ_Animate.DHWJ_TEvent"
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities

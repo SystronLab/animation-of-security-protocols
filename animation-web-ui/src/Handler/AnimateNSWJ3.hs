@@ -67,12 +67,18 @@ getAnimateNSWJ3R = do
       [] -> liftHandler $ initInsertEventTreeToDB Eve3 
       _ -> return () -- So the tree is already in the DB
 
+    rootEventDBEve4 <- runDB $ getRootEventDBEve4 
+    case rootEventDBEve4 of
+      [] -> liftHandler $ initInsertEventTreeToDB Eve4 
+      _ -> return () -- So the tree is already in the DB
+
     maybeProtocol <- lookupSession $ sessionProtocolNameKey
     case maybeProtocol of
       -- We don't need to set the protocol name if it is already NSWJ3
       Just "NSWJ3Eve1" -> return ()
       Just "NSWJ3Eve2" -> return ()
       Just "NSWJ3Eve3" -> return ()
+      Just "NSWJ3Eve4" -> return ()
       -- Otherwise, clear the session and set the protocol name to NSWJ3 
       _ -> do
         clearSession
@@ -84,6 +90,7 @@ getAnimateNSWJ3R = do
         Just Eve1 -> generateFormPost $ eveScenarioForm Eve1
         Just Eve2 -> generateFormPost $ eveScenarioForm Eve2
         Just Eve3 -> generateFormPost $ eveScenarioForm Eve3
+        Just Eve4 -> generateFormPost $ eveScenarioForm Eve4
         _ -> do 
           clearSession
           setSession sessionProtocolNameKey "NSWJ3Eve3"
@@ -212,6 +219,7 @@ postViewNSWJ3CounterExampleR no = do
           Just Eve1 -> getEventsFromDBEve1 eventIdList 
           Just Eve2 -> getEventsFromDBEve2 eventIdList 
           Just Eve3 -> getEventsFromDBEve3 eventIdList 
+          Just Eve4 -> getEventsFromDBEve4 eventIdList 
           _ -> return $ [] 
       liftIO $ print $ "eventListTuples" <> (events2PlantUMLInput eventListTuples)
       setSession sessionCntExPlantumlInputKey $ events2PlantUMLInput eventListTuples
@@ -233,6 +241,7 @@ eveFormHandler eveInput = do
     Eve1 -> setSession sessionProtocolNameKey "NSWJ3Eve1"
     Eve2 -> setSession sessionProtocolNameKey "NSWJ3Eve2"
     Eve3 -> setSession sessionProtocolNameKey "NSWJ3Eve3" 
+    Eve4 -> setSession sessionProtocolNameKey "NSWJ3Eve4" 
     _ -> setSession sessionProtocolNameKey "NSWJ3Eve3"
 
   return $ concat
@@ -284,6 +293,18 @@ initInsertEventTreeToDB eve = do
                 eid <- traverseTree (map NSA.NSWJ3_EventTree xs) 0 0 eve
                 return ()
           _ -> return ()
+      Eve4 -> 
+        case NSA.explore_tree_NSWJ3 depth internal_depth Eve4 of
+          NSA.ETNode (NSA.TEP 0 0 NSA.Root) trees -> do 
+            -- insert the ROOT event with its parent id set to -1
+            runDB $ do insert_ $ NSWJ3TreesEve4 "NSWJ3Eve4" 0 0 0 (-1) (NSA.NSWJ3_TEvent NSA.Root)
+            case trees of
+              [] -> return ()
+              (xs) -> do 
+                -- liftIO $ print "initInsertEventTreeToDB" 
+                eid <- traverseTree (map NSA.NSWJ3_EventTree xs) 0 0 eve
+                return ()
+          _ -> return ()
       _ -> return ()
 
 -- | Traverse a list of event trees based on current event id and parent
@@ -310,6 +331,12 @@ traverseTree (x:xs) eid parent deve = case x of
         eid1 <- traverseTree (map NSA.NSWJ3_EventTree trees) (eid+1) (eid+1) deve
         eid2 <- traverseTree xs eid1 parent deve
         return eid2
+      Eve4 -> do
+        -- logInfo $ "Insert: " <> T.pack (show e)
+        runDB $ do insert_ $ NSWJ3TreesEve4 "NSWJ3Eve4" (eid+1) d n parent (NSA.NSWJ3_TEvent e)
+        eid1 <- traverseTree (map NSA.NSWJ3_EventTree trees) (eid+1) (eid+1) deve
+        eid2 <- traverseTree xs eid1 parent deve
+        return eid2
 
 -- | Get the ROOT event from the database
 getRootEventDBEve1 :: DB [Entity NSWJ3TreesEve1]
@@ -324,6 +351,9 @@ getRootEventDBEve2 = selectList [NSWJ3TreesEve2Depth ==. 0, NSWJ3TreesEve2Number
 getRootEventDBEve3 :: DB [Entity NSWJ3TreesEve3]
 getRootEventDBEve3 = selectList [NSWJ3TreesEve3Depth ==. 0, NSWJ3TreesEve3Number ==. 0, NSWJ3TreesEve3Event ==. (NSA.NSWJ3_TEvent NSA.Root)] [Asc NSWJ3TreesEve3Id]
 
+getRootEventDBEve4 :: DB [Entity NSWJ3TreesEve4]
+getRootEventDBEve4 = selectList [NSWJ3TreesEve4Depth ==. 0, NSWJ3TreesEve4Number ==. 0, NSWJ3TreesEve4Event ==. (NSA.NSWJ3_TEvent NSA.Root)] [Asc NSWJ3TreesEve4Id]
+
 -- | Get the next events for animation from current chosen event 
 getNextEventsDBEve1 :: Int -> DB [Entity NSWJ3TreesEve1]
 getNextEventsDBEve1 parent_eid = selectList [NSWJ3TreesEve1Parent ==. parent_eid] [Asc NSWJ3TreesEve1Id]
@@ -333,6 +363,9 @@ getNextEventsDBEve2 parent_eid = selectList [NSWJ3TreesEve2Parent ==. parent_eid
 
 getNextEventsDBEve3 :: Int -> DB [Entity NSWJ3TreesEve3]
 getNextEventsDBEve3 parent_eid = selectList [NSWJ3TreesEve3Parent ==. parent_eid] [Asc NSWJ3TreesEve3Id]
+
+getNextEventsDBEve4 :: Int -> DB [Entity NSWJ3TreesEve4]
+getNextEventsDBEve4 parent_eid = selectList [NSWJ3TreesEve4Parent ==. parent_eid] [Asc NSWJ3TreesEve4Id]
 
 -- | Convert a list of tree entities to a list of event tuples, indexed by the depth number 
 entities2EventListIndexedByDepthNumberEve1:: [Entity NSWJ3TreesEve1] -> [(Text, (Text, Text, Text, Text, Text, Text))]
@@ -367,6 +400,17 @@ entities2EventListIndexedByDepthNumberEve3 (x:xs) = case x of
     NSA.NSWJ3_TEvent NSA.Divergent -> (T.pack $ show number, (T.pack $ show eid, "Divergent", "Sys", "Env", "Env", "") ) : entities2EventListIndexedByDepthNumberEve3 xs
     NSA.NSWJ3_TEvent (NSA.EChan e) -> let (ch, src, mid, dest, msg) = convertAgentName $ NSA.formatEvents e in 
       (T.pack $ show number, (T.pack $ show eid, T.pack $ ch, T.pack $ src, T.pack $ mid, T.pack $ dest, T.pack $ msg)) : entities2EventListIndexedByDepthNumberEve3 xs
+
+entities2EventListIndexedByDepthNumberEve4:: [Entity NSWJ3TreesEve4] -> [(Text, (Text, Text, Text, Text, Text, Text))]
+entities2EventListIndexedByDepthNumberEve4 [] = []
+entities2EventListIndexedByDepthNumberEve4 (x:xs) = case x of 
+  Entity _ (NSWJ3TreesEve4 protocol eid depth number parent event) -> case event of 
+    NSA.NSWJ3_TEvent NSA.Root -> (T.pack $ show number, (T.pack $ show eid, "ROOT", "Env", "Env", "Env", "") ) : entities2EventListIndexedByDepthNumberEve4 xs
+    NSA.NSWJ3_TEvent NSA.Deadlocked -> (T.pack $ show number, (T.pack $ show eid, "Deadlocked", "Sys", "Env", "Env", "") ) : entities2EventListIndexedByDepthNumberEve4 xs
+    NSA.NSWJ3_TEvent NSA.Terminated -> (T.pack $ show number, (T.pack $ show eid, "Terminated", "Sys", "Env", "Env", "") ) : entities2EventListIndexedByDepthNumberEve4 xs
+    NSA.NSWJ3_TEvent NSA.Divergent -> (T.pack $ show number, (T.pack $ show eid, "Divergent", "Sys", "Env", "Env", "") ) : entities2EventListIndexedByDepthNumberEve4 xs
+    NSA.NSWJ3_TEvent (NSA.EChan e) -> let (ch, src, mid, dest, msg) = convertAgentName $ NSA.formatEvents e in 
+      (T.pack $ show number, (T.pack $ show eid, T.pack $ ch, T.pack $ src, T.pack $ mid, T.pack $ dest, T.pack $ msg)) : entities2EventListIndexedByDepthNumberEve4 xs
 
 -- | Convert a list of tree entities to a list of event tuples, indexed by the eid number 
 entities2EventListIndexedByEidEve1 :: [Entity NSWJ3TreesEve1] -> [(Text, (Text, Text, Text, Text, Text))]
@@ -403,6 +447,17 @@ entities2EventListIndexedByEidEve3 (x:xs) = case x of
     NSA.NSWJ3_TEvent (NSA.EChan e) -> let (ch, src, mid, dest, msg) = convertAgentName $ NSA.formatEvents e in 
       (T.pack $ show eid, (T.pack $ ch, T.pack $ src, T.pack $ mid, T.pack $ dest, T.pack $ msg)) : entities2EventListIndexedByEidEve3 xs
 
+entities2EventListIndexedByEidEve4 :: [Entity NSWJ3TreesEve4] -> [(Text, (Text, Text, Text, Text, Text))]
+entities2EventListIndexedByEidEve4 [] = []
+entities2EventListIndexedByEidEve4 (x:xs) = case x of 
+  Entity _ (NSWJ3TreesEve4 protocol eid depth number parent event) -> case event of 
+    NSA.NSWJ3_TEvent NSA.Root -> (T.pack $ show eid, ("ROOT", "Env", "Env", "Env", "") ) : entities2EventListIndexedByEidEve4 xs
+    NSA.NSWJ3_TEvent NSA.Deadlocked -> (T.pack $ show eid, ("Deadlocked", "Sys", "Env", "Env", "") ) : entities2EventListIndexedByEidEve4 xs
+    NSA.NSWJ3_TEvent NSA.Terminated -> (T.pack $ show eid, ("Terminated", "Sys", "Env", "Env", "") ) : entities2EventListIndexedByEidEve4 xs
+    NSA.NSWJ3_TEvent NSA.Divergent -> (T.pack $ show eid, ("Divergent", "Sys", "Env", "Env", "") ) : entities2EventListIndexedByEidEve4 xs
+    NSA.NSWJ3_TEvent (NSA.EChan e) -> let (ch, src, mid, dest, msg) = convertAgentName $ NSA.formatEvents e in 
+      (T.pack $ show eid, (T.pack $ ch, T.pack $ src, T.pack $ mid, T.pack $ dest, T.pack $ msg)) : entities2EventListIndexedByEidEve4 xs
+
 -- | Get all events to be shown and animated
 getAllNextEventsFromDB :: Handler [(Text, (Text, Text, Text, Text, Text, Text))]
 getAllNextEventsFromDB = do 
@@ -423,6 +478,9 @@ getAllNextEventsFromDB = do
           Just Eve3 -> do 
             nextEvents <- runDB $ (getNextEventsDBEve3 0)
             return $ entities2EventListIndexedByDepthNumberEve3 nextEvents
+          Just Eve4 -> do 
+            nextEvents <- runDB $ (getNextEventsDBEve4 0)
+            return $ entities2EventListIndexedByDepthNumberEve4 nextEvents
           _ -> return [] 
       Just str_parent_eid -> case (readMaybe $ T.unpack str_parent_eid) of
         Nothing -> do 
@@ -437,6 +495,9 @@ getAllNextEventsFromDB = do
             Just Eve3 -> do 
               nextEvents <- runDB $ (getNextEventsDBEve3 0)
               return $ entities2EventListIndexedByDepthNumberEve3 nextEvents
+            Just Eve4 -> do 
+              nextEvents <- runDB $ (getNextEventsDBEve4 0)
+              return $ entities2EventListIndexedByDepthNumberEve4 nextEvents
             _ -> return []
         Just parent_eid -> do
           case maybeEve of
@@ -449,6 +510,9 @@ getAllNextEventsFromDB = do
             Just Eve3 -> do 
               nextEvents <- runDB $ getNextEventsDBEve3 parent_eid 
               return $ entities2EventListIndexedByDepthNumberEve3 nextEvents
+            Just Eve4 -> do 
+              nextEvents <- runDB $ getNextEventsDBEve4 parent_eid 
+              return $ entities2EventListIndexedByDepthNumberEve4 nextEvents
             _ -> return []
     return allEvents
 
@@ -525,6 +589,11 @@ autoCheck reach chMonitor msgMonitor chCheck msgCheck = do
               -- Current trace should be the value of "trace" in session, but it is String. Here we need a TEvent.
               -- So we set it to empty list and let higher layer combine them.
               exhaustiveSearchEve3 reach chMonitor msgMonitor chCheck msgCheck [] 0 nextEvents
+            Just Eve4 -> do 
+              nextEvents <- runDB $ getNextEventsDBEve4 parent_eid 
+              -- Current trace should be the value of "trace" in session, but it is String. Here we need a TEvent.
+              -- So we set it to empty list and let higher layer combine them.
+              exhaustiveSearchEve4 reach chMonitor msgMonitor chCheck msgCheck [] 0 nextEvents
             _ -> return [[]]
 
 -- | Automatically reachability check with events for monitoring
@@ -636,6 +705,41 @@ exhaustiveSearchEve3 reach chMonitor msgMonitor chCheck msgCheck currentTrace mo
               xRes <- exhaustiveSearchEve3 reach chMonitor msgMonitor chCheck msgCheck (currentTrace ++ [eid]) monitoredBefore nextEvents 
               return (xsRes ++ xRes)
 
+exhaustiveSearchEve4 :: CheckMode -> Text -> Maybe Text -> Text -> Maybe Text 
+  -> [Int] -- current trace
+  -> Int -- the number of times that the event for monitoring occurred
+  -> [Entity NSWJ3TreesEve4] 
+  -> Handler [[Int]] -- all counterexamples
+exhaustiveSearchEve4 reach chMonitor msgMonitor chCheck msgCheck currentTrace monitoredBefore [] = return []
+exhaustiveSearchEve4 reach chMonitor msgMonitor chCheck msgCheck currentTrace monitoredBefore (x:xs) = do
+  xsRes <- exhaustiveSearchEve4 reach chMonitor msgMonitor chCheck msgCheck currentTrace monitoredBefore xs
+  case x of 
+    Entity _ (NSWJ3TreesEve4 protocol eid depth number parent event) -> 
+      case isMatchedEvent chMonitor msgMonitor event of
+        True -> do 
+          nextEvents <- runDB $ getNextEventsDBEve4 eid 
+          xRes <- exhaustiveSearchEve4 reach chMonitor msgMonitor chCheck msgCheck (currentTrace ++ [eid]) (monitoredBefore + 1) nextEvents 
+          return (xsRes ++ xRes)
+        False -> 
+          case isMatchedEvent chCheck msgCheck event of
+            -- If the event for checking matches, finish the search along this path, and add the current trace to the counterexamples 
+            True -> case reach of 
+              Correspondence -> do -- If checking for reachability, check if the event for monitoring is reachable
+                if monitoredBefore > 0 then 
+                  return xsRes  -- this is not a counterexample
+                else
+                  return ([currentTrace ++ [eid]] ++ xsRes) -- this is a counterexample
+              Injective_Correspondence -> do
+                if monitoredBefore == 1 then 
+                  return xsRes  -- this is not a counterexample
+                else
+                  return ([currentTrace ++ [eid]] ++ xsRes) -- this is a counterexample
+              Secrecy -> -- If checking for secrecy, this is the counterexample 
+                return ([currentTrace ++ [eid]] ++ xsRes)
+            False -> do
+              nextEvents <- runDB $ getNextEventsDBEve4 eid 
+              xRes <- exhaustiveSearchEve4 reach chMonitor msgMonitor chCheck msgCheck (currentTrace ++ [eid]) monitoredBefore nextEvents 
+              return (xsRes ++ xRes)
 -- | A session key "number_of_counterexamples" to store the number of counterexamples
 --   and additional n session variables "counterexample_i" to store the trace of the i-th counterexample 
 clearSessionForCounterexamples :: Handler ()
@@ -701,6 +805,7 @@ eidsToPrettyEvents events = do
           eventIdList = map read eventIdListStr
       -- (eid, (ch, src, dest, msg))
       maybeEve <- currentEveScenario
+      -- liftIO $ print $ "maybeEve in eidsToPrettyEvents" <> T.pack (show maybeEve)
       case maybeEve of 
         Nothing -> return []
         Just Eve1 -> do
@@ -711,6 +816,9 @@ eidsToPrettyEvents events = do
           return $ map (\(eid, (ch, src, mid, dst, msg)) -> formatEventForDisplay ch src dst msg) eventListTuples
         Just Eve3 -> do
           eventListTuples <- getEventsFromDBEve3 eventIdList 
+          return $ map (\(eid, (ch, src, mid, dst, msg)) -> formatEventForDisplay ch src dst msg) eventListTuples 
+        Just Eve4 -> do
+          eventListTuples <- getEventsFromDBEve4 eventIdList 
           return $ map (\(eid, (ch, src, mid, dst, msg)) -> formatEventForDisplay ch src dst msg) eventListTuples 
 
 -- | A session key "number_of_counterexamples" to store the number of counterexamples
@@ -779,6 +887,11 @@ getEventsFromDBEve3 eventIds = do
   events <- runDB $ selectList [NSWJ3TreesEve3Eid <-. eventIds] [Asc NSWJ3TreesEve3Id]
   return $ entities2EventListIndexedByEidEve3 events
 
+getEventsFromDBEve4 :: [Int] -> Handler [(Text, (Text, Text, Text, Text, Text))]
+getEventsFromDBEve4 eventIds = do 
+  events <- runDB $ selectList [NSWJ3TreesEve4Eid <-. eventIds] [Asc NSWJ3TreesEve4Id]
+  return $ entities2EventListIndexedByEidEve4 events
+
 -- | Convert a list of events to a PlantUML input
 events2PlantUMLInput :: [(Text, (Text, Text, Text, Text, Text))] -> Text
 events2PlantUMLInput [] = ""
@@ -830,6 +943,7 @@ currentEveScenario = do
       Just "NSWJ3Eve1" -> return $ Just Eve1
       Just "NSWJ3Eve2" -> return $ Just Eve2
       Just "NSWJ3Eve3" -> return $ Just Eve3
+      Just "NSWJ3Eve4" -> return $ Just Eve4
       _ -> return $ Just Eve3 
 
 data EveInputForm = EveInputForm 
@@ -850,6 +964,7 @@ eveScenarioForm eve =
             [ ("Eve1 - Within Alice's Jamming Range but not Bob's", Eve1)
             , ("Eve2 - Within Bob's Jamming Range but not Alice's", Eve2)
             , ("Eve3 - Within Both Alice's and Bob's Jamming Ranges", Eve3)
+            , ("Eve4 - Not within Both Alice's and Bob's Jamming Ranges", Eve4)
             ] 
 
 formatAgentName :: String -> String

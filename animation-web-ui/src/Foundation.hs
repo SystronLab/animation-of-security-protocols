@@ -149,6 +149,11 @@ instance Yesod App where
                     , menuItemRoute = AnimateNSWJ3R
                     , menuItemAccessCallback = True 
                     }
+                , NavbarRight $ MenuItem
+                    { menuItemLabel = "Animate DHWJ"
+                    , menuItemRoute = AnimateDHWJR
+                    , menuItemAccessCallback = True 
+                    }
                 ]
 
         let navbarLeftMenuItems = [x | NavbarLeft x <- menuItems]
@@ -207,6 +212,11 @@ instance Yesod App where
     isAuthorized (AnimateNSWJ3ResetR) _ = return Authorized
     isAuthorized (ViewNSWJ3CounterExampleR _) _ = return Authorized
     isAuthorized (ChangeNSWJ3ProtocolR) _ = return Authorized
+    isAuthorized (AnimateDHWJR) _ = return Authorized
+    isAuthorized (AnimateDHWJAutoR) _ = return Authorized
+    isAuthorized (AnimateDHWJResetR) _ = return Authorized
+    isAuthorized (ViewDHWJCounterExampleR _) _ = return Authorized
+    isAuthorized (ChangeDHWJProtocolR) _ = return Authorized
 
     -- This function creates static content files in the static folder
     -- and names them based on a hash of their content. This allows
@@ -268,6 +278,10 @@ instance YesodBreadcrumbs App where
     breadcrumb (AnimateNSWJ3AutoR) = return ("Automatic checking (NSWJ3)", Just HomeR)
     breadcrumb (ViewNSWJ3CounterExampleR _) = return ("View counterexample in sequence diagram", Just AnimateNSWJ3R)
     breadcrumb (ChangeNSWJ3ProtocolR) = return ("Change the location of Eavesdropper", Just AnimateNSWJ3R)
+    breadcrumb (AnimateDHWJR) = return ("Animate DHWJ", Just HomeR)
+    breadcrumb (AnimateDHWJAutoR) = return ("Automatic checking (DHWJ)", Just HomeR)
+    breadcrumb (ViewDHWJCounterExampleR _) = return ("View counterexample in sequence diagram", Just AnimateDHWJR)
+    breadcrumb (ChangeDHWJProtocolR) = return ("Change the location of Eavesdropper", Just AnimateDHWJR)
     breadcrumb  _ = return ("home", Nothing)
 
 -- How to run database actions.

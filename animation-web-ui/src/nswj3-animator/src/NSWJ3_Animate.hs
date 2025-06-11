@@ -42,6 +42,7 @@ newtype NSWJ3_TEvent = NSWJ3_TEvent (TEvent
   (Numeral_Type.Bit0 (Numeral_Type.Bit0 Numeral_Type.Num1))
   Numeral_Type.Num1 
   (Numeral_Type.Bit1 Numeral_Type.Num1)
+  (Numeral_Type.Bit0 Numeral_Type.Num1)
   )
   deriving (Eq, Read, Show);
 
@@ -52,6 +53,7 @@ newtype NSWJ3_EventTree = NSWJ3_EventTree (EventTree
   (Numeral_Type.Bit0 (Numeral_Type.Bit0 Numeral_Type.Num1))
   Numeral_Type.Num1 
   (Numeral_Type.Bit1 Numeral_Type.Num1)
+  (Numeral_Type.Bit0 Numeral_Type.Num1)
   )
   deriving (Eq, Read, Show);
 
@@ -66,5 +68,7 @@ explore_tree_NSWJ3 ::  Int -> Int -> Deve -> EventTree
   (Numeral_Type.Bit0 (Numeral_Type.Bit0 Numeral_Type.Num1))
   (Numeral_Type.Bit0 (Numeral_Type.Bit0 Numeral_Type.Num1))
   Numeral_Type.Num1 
-  (Numeral_Type.Bit1 Numeral_Type.Num1);
+  (Numeral_Type.Bit1 Numeral_Type.Num1)
+  (Numeral_Type.Bit0 Numeral_Type.Num1)
+  ;
 explore_tree_NSWJ3 steps tau_steps eve = ETNode (TEP 0 0 Root) (explore_tree_cnt (nSWJ3_active eve) steps 1 tau_steps tau_steps)

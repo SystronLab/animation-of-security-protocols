@@ -3,13 +3,13 @@
 module
   Sec_Messages(Dagent(..), equal_dagent, Dsig(..), equal_dsig, Dbitmask(..),
                 equal_dbitmask, Dkey(..), equal_dkey, Dmsg(..), equal_dmsg,
-                Chan(..), equal_chan, last4, atomic, is_MWat, mwb, break_lst,
-                atomics, breakm, ma, mn, sn, sp, un_env_C, is_env_C, env,
-                un_sig_C, is_sig_C, sig, mc1, mc2, mjm, mwm, agentsLst,
-                noncesLst, buildable, un_cjam_C, is_cjam_C, cjam, un_leak_C,
-                is_leak_C, leak, un_recv_C, is_recv_C, recv, un_send_C,
-                is_send_C, send, un_terminate_C, is_terminate_C, terminate,
-                filter_buildable)
+                Chan(..), equal_chan, last4, atomic, less_eq_dbitmask, is_MWat,
+                mwb, mbm, break_lst, atomics, breakm, ma, mn, sn, sp, un_env_C,
+                is_env_C, env, un_sig_C, is_sig_C, sig, mc1, mc2, mjm, mwm,
+                agentsLst, noncesLst, buildable, un_cjam_C, is_cjam_C, cjam,
+                un_leak_C, is_leak_C, leak, un_recv_C, is_recv_C, recv,
+                un_send_C, is_send_C, send, un_terminate_C, is_terminate_C,
+                terminate, filter_buildable)
   where {
 
 import Prelude ((==), (/=), (<), (<=), (>=), (>), (+), (-), (*), (/), (**),
@@ -71,14 +71,17 @@ equal_dsig (StartProt x21 x22 x23 x24) (StartProt y21 y22 y23 y24) =
 equal_dsig (ClaimSecret x11 x12 x13) (ClaimSecret y11 y12 y13) =
   equal_dagent x11 y11 && FSNat.equal_fsnat x12 y12 && Set.equal_set x13 y13;
 
-data Dbitmask a = Null | Bm (FSNat.Fsnat a)
+data Dbitmask a b = Null | Bm (FSNat.Fsnat a) (FSNat.Fsnat b)
   deriving (Prelude.Read, Prelude.Show);
 
 equal_dbitmask ::
-  forall a. (Type_Length.Len a) => Dbitmask a -> Dbitmask a -> Bool;
-equal_dbitmask Null (Bm x2) = False;
-equal_dbitmask (Bm x2) Null = False;
-equal_dbitmask (Bm x2) (Bm y2) = FSNat.equal_fsnat x2 y2;
+  forall a b.
+    (Type_Length.Len a,
+      Type_Length.Len b) => Dbitmask a b -> Dbitmask a b -> Bool;
+equal_dbitmask Null (Bm x21 x22) = False;
+equal_dbitmask (Bm x21 x22) Null = False;
+equal_dbitmask (Bm x21 x22) (Bm y21 y22) =
+  FSNat.equal_fsnat x21 y21 && FSNat.equal_fsnat x22 y22;
 equal_dbitmask Null Null = True;
 
 data Dkey a b = Kp (FSNat.Fsnat a) | Ks (FSNat.Fsnat b)
@@ -92,21 +95,21 @@ equal_dkey (Ks x2) (Kp x1) = False;
 equal_dkey (Ks x2) (Ks y2) = FSNat.equal_fsnat x2 y2;
 equal_dkey (Kp x1) (Kp y1) = FSNat.equal_fsnat x1 y1;
 
-data Dmsg a b c d e f = MAg (Dagent a) | MNon (FSNat.Fsnat b) | MK (Dkey c d)
-  | MPair (Dmsg a b c d e f) (Dmsg a b c d e f)
-  | MAEnc (Dmsg a b c d e f) (Dmsg a b c d e f)
-  | MSig (Dmsg a b c d e f) (Dmsg a b c d e f)
-  | MSEnc (Dmsg a b c d e f) (Dmsg a b c d e f) | MExpg (FSNat.Fsnat e)
-  | MModExp (Dmsg a b c d e f) (Dmsg a b c d e f) | MBitm (Dbitmask f)
-  | MWat (Dmsg a b c d e f) (Dmsg a b c d e f)
-  | MJam (Dmsg a b c d e f) (Dmsg a b c d e f)
+data Dmsg a b c d e f g = MAg (Dagent a) | MNon (FSNat.Fsnat b) | MK (Dkey c d)
+  | MPair (Dmsg a b c d e f g) (Dmsg a b c d e f g)
+  | MAEnc (Dmsg a b c d e f g) (Dmsg a b c d e f g)
+  | MSig (Dmsg a b c d e f g) (Dmsg a b c d e f g)
+  | MSEnc (Dmsg a b c d e f g) (Dmsg a b c d e f g) | MExpg (FSNat.Fsnat e)
+  | MModExp (Dmsg a b c d e f g) (Dmsg a b c d e f g) | MBitm (Dbitmask f g)
+  | MWat (Dmsg a b c d e f g) (Dmsg a b c d e f g)
+  | MJam (Dmsg a b c d e f g) (Dmsg a b c d e f g)
   deriving (Prelude.Read, Prelude.Show);
 
 equal_dmsg ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e,
-      Type_Length.Len f) => Dmsg a b c d e f -> Dmsg a b c d e f -> Bool;
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => Dmsg a b c d e f g -> Dmsg a b c d e f g -> Bool;
 equal_dmsg (MWat x111 x112) (MJam x121 x122) = False;
 equal_dmsg (MJam x121 x122) (MWat x111 x112) = False;
 equal_dmsg (MBitm x10) (MJam x121 x122) = False;
@@ -259,26 +262,26 @@ equal_dmsg (MK x3) (MK y3) = equal_dkey x3 y3;
 equal_dmsg (MNon x2) (MNon y2) = FSNat.equal_fsnat x2 y2;
 equal_dmsg (MAg x1) (MAg y1) = equal_dagent x1 y1;
 
-data Chan a b c d e f = Env_C (Dagent a, Dagent a)
-  | Send_C (Dagent a, (Dagent a, (Dagent a, Dmsg a b c d e f)))
-  | Cjam_C (Dmsg a b c d e f) | Cdejam_C (Dmsg a b c d e f)
-  | Recv_C (Dagent a, (Dagent a, (Dagent a, Dmsg a b c d e f)))
-  | Leak_C (Dmsg a b c d e f) | Sig_C (Dsig a b) | Terminate_C ()
+data Chan a b c d e f g = Env_C (Dagent a, Dagent a)
+  | Send_C (Dagent a, (Dagent a, (Dagent a, Dmsg a b c d e f g)))
+  | Cjam_C (Dmsg a b c d e f g) | Cdejam_C (Dmsg a b c d e f g)
+  | Recv_C (Dagent a, (Dagent a, (Dagent a, Dmsg a b c d e f g)))
+  | Leak_C (Dmsg a b c d e f g) | Sig_C (Dsig a b) | Terminate_C ()
   deriving (Prelude.Read, Prelude.Show);
 
 instance (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c,
-           Type_Length.Len d, Type_Length.Len e,
-           Type_Length.Len f) => Eq (Dmsg a b c d e f) where {
+           Type_Length.Len d, Type_Length.Len e, Type_Length.Len f,
+           Type_Length.Len g) => Eq (Dmsg a b c d e f g) where {
   a == b = equal_dmsg a b;
 };
 
 equal_chan ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Chan a b c d e f -> Chan a b c d e f -> Bool;
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> Chan a b c d e f g -> Bool;
 equal_chan (Sig_C x7) (Terminate_C x8) = False;
 equal_chan (Terminate_C x8) (Sig_C x7) = False;
 equal_chan (Leak_C x6) (Terminate_C x8) = False;
@@ -347,8 +350,9 @@ equal_chan (Env_C x1) (Env_C y1) = x1 == y1;
 instance (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b,
            Typerep.Typerep b, Type_Length.Len c, Typerep.Typerep c,
            Type_Length.Len d, Typerep.Typerep d, Type_Length.Len e,
-           Typerep.Typerep e, Type_Length.Len f,
-           Typerep.Typerep f) => Eq (Chan a b c d e f) where {
+           Typerep.Typerep e, Type_Length.Len f, Typerep.Typerep f,
+           Type_Length.Len g,
+           Typerep.Typerep g) => Eq (Chan a b c d e f g) where {
   a == b = equal_chan a b;
 };
 
@@ -356,10 +360,10 @@ last4 :: forall a b c d. (a, (b, (c, d))) -> d;
 last4 x = snd (snd (snd x));
 
 atomic ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e,
-      Type_Length.Len f) => Dmsg a b c d e f -> [Dmsg a b c d e f];
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => Dmsg a b c d e f g -> [Dmsg a b c d e f g];
 atomic (MAg m) = [MAg m];
 atomic (MNon m) = [MNon m];
 atomic (MK m) = [MK m];
@@ -373,10 +377,26 @@ atomic (MBitm b) = [MBitm b];
 atomic (MWat m k) = atomic m;
 atomic (MJam m k) = atomic m;
 
+less_eq_dbitmask ::
+  forall a b.
+    (Type_Length.Len a,
+      Type_Length.Len b) => Dbitmask a b -> Dbitmask a b -> Bool;
+less_eq_dbitmask =
+  (\ a b ->
+    (case a of {
+      Null -> True;
+      Bm x1 y1 ->
+        (case b of {
+          Null -> False;
+          Bm x2 y2 -> FSNat.equal_fsnat x1 x2 && FSNat.less_eq_fsnat y1 y2;
+        });
+    }));
+
 is_MWat ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e, Type_Length.Len f) => Dmsg a b c d e f -> Bool;
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => Dmsg a b c d e f g -> Bool;
 is_MWat (MAg x1) = False;
 is_MWat (MNon x2) = False;
 is_MWat (MK x3) = False;
@@ -391,19 +411,27 @@ is_MWat (MWat x111 x112) = True;
 is_MWat (MJam x121 x122) = False;
 
 mwb ::
+  forall a b c d e f g.
+    (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => Dmsg a b c d e f g -> Dmsg a b c d e f g;
+mwb (MWat x111 x112) = x112;
+
+mbm ::
+  forall a b c d e f g.
+    (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => Dmsg a b c d e f g -> Dbitmask f g;
+mbm (MBitm x10) = x10;
+
+break_lst ::
   forall a b c d e f.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
       Type_Length.Len e,
-      Type_Length.Len f) => Dmsg a b c d e f -> Dmsg a b c d e f;
-mwb (MWat x111 x112) = x112;
-
-break_lst ::
-  forall a b c d e.
-    (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e) => [Dmsg a b c c d e] ->
-                              [Dmsg a b c c d e] ->
-                                Set.Set (Dmsg a b c c d e) ->
-                                  [Dmsg a b c c d e];
+      Type_Length.Len f) => [Dmsg a b c c d e f] ->
+                              [Dmsg a b c c d e f] ->
+                                Set.Set (Dmsg a b c c d e f) ->
+                                  [Dmsg a b c c d e f];
 break_lst [] ams asa = ams;
 break_lst (MK k : xs) ams asa = break_lst xs (List.insert (MK k) ams) asa;
 break_lst (MAg a : xs) ams asa = break_lst xs (List.insert (MAg a) ams) asa;
@@ -519,7 +547,7 @@ break_lst (MWat m b : xs) ams asa = break_lst xs (List.insert m ams) asa;
 break_lst (MJam m (MBitm b) : xs) ams asa =
   (if not (equal_dbitmask b Null)
     then (if is_MWat m &&
-               equal_dmsg (mwb m) (MBitm b) && Set.member (MBitm b) asa
+               less_eq_dbitmask b (mbm (mwb m)) && Set.member (MBitm b) asa
            then (if List.member ams (MBitm b)
                   then break_lst (m : xs) (List.insert (MJam m (MBitm b)) ams)
                          asa
@@ -530,7 +558,10 @@ break_lst (MJam m (MBitm b) : xs) ams asa =
                                      (List.insert (MJam m (MBitm b)) ams) asa
                               else break_lst xs
                                      (List.insert (MJam m (MBitm b)) ams) asa))
-           else break_lst xs (List.insert (MJam m (MBitm b)) ams) asa)
+           else (if List.member ams (MBitm b)
+                  then break_lst (m : xs) (List.insert (MJam m (MBitm b)) ams)
+                         asa
+                  else break_lst xs (List.insert (MJam m (MBitm b)) ams) asa))
     else break_lst (m : xs) (List.insert (MJam m (MBitm b)) ams) asa);
 break_lst (MAEnc v (MAg vb) : xs) ams asa =
   break_lst xs (List.insert (MAEnc v (MAg vb)) ams) asa;
@@ -604,31 +635,32 @@ break_lst (MJam v (MJam vb vc) : xs) ams asa =
   break_lst xs (List.insert (MJam v (MJam vb vc)) ams) asa;
 
 atomics ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e,
-      Type_Length.Len f) => [Dmsg a b c d e f] -> [Dmsg a b c d e f];
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => [Dmsg a b c d e f g] -> [Dmsg a b c d e f g];
 atomics xs = concatMap atomic xs;
 
 breakm ::
-  forall a b c d e.
+  forall a b c d e f.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e) => [Dmsg a b c c d e] -> [Dmsg a b c c d e];
+      Type_Length.Len e,
+      Type_Length.Len f) => [Dmsg a b c c d e f] -> [Dmsg a b c c d e f];
 breakm xs = let {
               asa = Set.Set (atomics xs);
               ys = break_lst xs [] asa;
             } in break_lst ys [] asa;
 
-ma :: forall a b c d e f.
+ma :: forall a b c d e f g.
         (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c,
-          Type_Length.Len d, Type_Length.Len e,
-          Type_Length.Len f) => Dmsg a b c d e f -> Dagent a;
+          Type_Length.Len d, Type_Length.Len e, Type_Length.Len f,
+          Type_Length.Len g) => Dmsg a b c d e f g -> Dagent a;
 ma (MAg x1) = x1;
 
-mn :: forall a b c d e f.
+mn :: forall a b c d e f g.
         (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c,
-          Type_Length.Len d, Type_Length.Len e,
-          Type_Length.Len f) => Dmsg a b c d e f -> FSNat.Fsnat b;
+          Type_Length.Len d, Type_Length.Len e, Type_Length.Len f,
+          Type_Length.Len g) => Dmsg a b c d e f g -> FSNat.Fsnat b;
 mn (MNon x2) = x2;
 
 sn :: forall a b.
@@ -641,20 +673,21 @@ sp :: forall a b.
 sp (ClaimSecret x11 x12 x13) = x13;
 
 un_env_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Chan a b c d e f -> (Dagent a, Dagent a);
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> (Dagent a, Dagent a);
 un_env_C (Env_C x1) = x1;
 
 is_env_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f, Typerep.Typerep f) => Chan a b c d e f -> Bool;
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> Bool;
 is_env_C (Env_C x1) = True;
 is_env_C (Send_C x2) = False;
 is_env_C (Cjam_C x3) = False;
@@ -665,29 +698,31 @@ is_env_C (Sig_C x7) = False;
 is_env_C (Terminate_C x8) = False;
 
 env ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Prisms.Prism_ext (Dagent a, Dagent a)
-                              (Chan a b c d e f) ();
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Prisms.Prism_ext (Dagent a, Dagent a)
+                              (Chan a b c d e f g) ();
 env = Channel_Type.ctor_prism Env_C is_env_C un_env_C;
 
 un_sig_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f, Typerep.Typerep f) => Chan a b c d e f -> Dsig a b;
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> Dsig a b;
 un_sig_C (Sig_C x7) = x7;
 
 is_sig_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f, Typerep.Typerep f) => Chan a b c d e f -> Bool;
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> Bool;
 is_sig_C (Env_C x1) = False;
 is_sig_C (Send_C x2) = False;
 is_sig_C (Cjam_C x3) = False;
@@ -698,61 +733,62 @@ is_sig_C (Sig_C x7) = True;
 is_sig_C (Terminate_C x8) = False;
 
 sig ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Prisms.Prism_ext (Dsig a b) (Chan a b c d e f) ();
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Prisms.Prism_ext (Dsig a b) (Chan a b c d e f g) ();
 sig = Channel_Type.ctor_prism Sig_C is_sig_C un_sig_C;
 
 mc1 ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e,
-      Type_Length.Len f) => Dmsg a b c d e f -> Dmsg a b c d e f;
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => Dmsg a b c d e f g -> Dmsg a b c d e f g;
 mc1 (MPair x41 x42) = x41;
 
 mc2 ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e,
-      Type_Length.Len f) => Dmsg a b c d e f -> Dmsg a b c d e f;
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => Dmsg a b c d e f g -> Dmsg a b c d e f g;
 mc2 (MPair x41 x42) = x42;
 
 mjm ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e,
-      Type_Length.Len f) => Dmsg a b c d e f -> Dmsg a b c d e f;
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => Dmsg a b c d e f g -> Dmsg a b c d e f g;
 mjm (MJam x121 x122) = x121;
 
 mwm ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e,
-      Type_Length.Len f) => Dmsg a b c d e f -> Dmsg a b c d e f;
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => Dmsg a b c d e f g -> Dmsg a b c d e f g;
 mwm (MWat x111 x112) = x111;
 
 agentsLst ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e, Type_Length.Len f) => [Dagent a] -> [Dmsg a b c d e f];
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => [Dagent a] -> [Dmsg a b c d e f g];
 agentsLst asa = map MAg asa;
 
 noncesLst ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e,
-      Type_Length.Len f) => [FSNat.Fsnat a] -> [Dmsg b a c d e f];
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => [FSNat.Fsnat a] -> [Dmsg b a c d e f g];
 noncesLst xs = map MNon xs;
 
 buildable ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e,
-      Type_Length.Len f) => Dmsg a b c d e f ->
-                              Set.Set (Dmsg a b c d e f) -> Bool;
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => Dmsg a b c d e f g ->
+                              Set.Set (Dmsg a b c d e f g) -> Bool;
 buildable m ms =
   (if Set.member m ms then True
     else (case m of {
@@ -771,20 +807,21 @@ buildable m ms =
          }));
 
 un_cjam_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Chan a b c d e f -> Dmsg a b c d e f;
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> Dmsg a b c d e f g;
 un_cjam_C (Cjam_C x3) = x3;
 
 is_cjam_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f, Typerep.Typerep f) => Chan a b c d e f -> Bool;
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> Bool;
 is_cjam_C (Env_C x1) = False;
 is_cjam_C (Send_C x2) = False;
 is_cjam_C (Cjam_C x3) = True;
@@ -795,30 +832,31 @@ is_cjam_C (Sig_C x7) = False;
 is_cjam_C (Terminate_C x8) = False;
 
 cjam ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Prisms.Prism_ext (Dmsg a b c d e f)
-                              (Chan a b c d e f) ();
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Prisms.Prism_ext (Dmsg a b c d e f g)
+                              (Chan a b c d e f g) ();
 cjam = Channel_Type.ctor_prism Cjam_C is_cjam_C un_cjam_C;
 
 un_leak_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Chan a b c d e f -> Dmsg a b c d e f;
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> Dmsg a b c d e f g;
 un_leak_C (Leak_C x6) = x6;
 
 is_leak_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f, Typerep.Typerep f) => Chan a b c d e f -> Bool;
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> Bool;
 is_leak_C (Env_C x1) = False;
 is_leak_C (Send_C x2) = False;
 is_leak_C (Cjam_C x3) = False;
@@ -829,32 +867,33 @@ is_leak_C (Sig_C x7) = False;
 is_leak_C (Terminate_C x8) = False;
 
 leak ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Prisms.Prism_ext (Dmsg a b c d e f)
-                              (Chan a b c d e f) ();
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Prisms.Prism_ext (Dmsg a b c d e f g)
+                              (Chan a b c d e f g) ();
 leak = Channel_Type.ctor_prism Leak_C is_leak_C un_leak_C;
 
 un_recv_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Chan a b c d e f ->
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g ->
                               (Dagent a,
-                                (Dagent a, (Dagent a, Dmsg a b c d e f)));
+                                (Dagent a, (Dagent a, Dmsg a b c d e f g)));
 un_recv_C (Recv_C x5) = x5;
 
 is_recv_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f, Typerep.Typerep f) => Chan a b c d e f -> Bool;
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> Bool;
 is_recv_C (Env_C x1) = False;
 is_recv_C (Send_C x2) = False;
 is_recv_C (Cjam_C x3) = False;
@@ -865,34 +904,35 @@ is_recv_C (Sig_C x7) = False;
 is_recv_C (Terminate_C x8) = False;
 
 recv ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Prisms.Prism_ext
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Prisms.Prism_ext
                               (Dagent a,
-                                (Dagent a, (Dagent a, Dmsg a b c d e f)))
-                              (Chan a b c d e f) ();
+                                (Dagent a, (Dagent a, Dmsg a b c d e f g)))
+                              (Chan a b c d e f g) ();
 recv = Channel_Type.ctor_prism Recv_C is_recv_C un_recv_C;
 
 un_send_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Chan a b c d e f ->
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g ->
                               (Dagent a,
-                                (Dagent a, (Dagent a, Dmsg a b c d e f)));
+                                (Dagent a, (Dagent a, Dmsg a b c d e f g)));
 un_send_C (Send_C x2) = x2;
 
 is_send_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f, Typerep.Typerep f) => Chan a b c d e f -> Bool;
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> Bool;
 is_send_C (Env_C x1) = False;
 is_send_C (Send_C x2) = True;
 is_send_C (Cjam_C x3) = False;
@@ -903,31 +943,33 @@ is_send_C (Sig_C x7) = False;
 is_send_C (Terminate_C x8) = False;
 
 send ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Prisms.Prism_ext
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Prisms.Prism_ext
                               (Dagent a,
-                                (Dagent a, (Dagent a, Dmsg a b c d e f)))
-                              (Chan a b c d e f) ();
+                                (Dagent a, (Dagent a, Dmsg a b c d e f g)))
+                              (Chan a b c d e f g) ();
 send = Channel_Type.ctor_prism Send_C is_send_C un_send_C;
 
 un_terminate_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f, Typerep.Typerep f) => Chan a b c d e f -> ();
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> ();
 un_terminate_C (Terminate_C x8) = x8;
 
 is_terminate_C ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f, Typerep.Typerep f) => Chan a b c d e f -> Bool;
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Chan a b c d e f g -> Bool;
 is_terminate_C (Env_C x1) = False;
 is_terminate_C (Send_C x2) = False;
 is_terminate_C (Cjam_C x3) = False;
@@ -938,20 +980,21 @@ is_terminate_C (Sig_C x7) = False;
 is_terminate_C (Terminate_C x8) = True;
 
 terminate ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Typerep.Typerep a, Type_Length.Len b, Typerep.Typerep b,
       Type_Length.Len c, Typerep.Typerep c, Type_Length.Len d,
       Typerep.Typerep d, Type_Length.Len e, Typerep.Typerep e,
-      Type_Length.Len f,
-      Typerep.Typerep f) => Prisms.Prism_ext () (Chan a b c d e f) ();
+      Type_Length.Len f, Typerep.Typerep f, Type_Length.Len g,
+      Typerep.Typerep g) => Prisms.Prism_ext () (Chan a b c d e f g) ();
 terminate = Channel_Type.ctor_prism Terminate_C is_terminate_C un_terminate_C;
 
 filter_buildable ::
-  forall a b c d e f.
+  forall a b c d e f g.
     (Type_Length.Len a, Type_Length.Len b, Type_Length.Len c, Type_Length.Len d,
-      Type_Length.Len e,
-      Type_Length.Len f) => [Dmsg a b c d e f] ->
-                              Set.Set (Dmsg a b c d e f) -> [Dmsg a b c d e f];
+      Type_Length.Len e, Type_Length.Len f,
+      Type_Length.Len g) => [Dmsg a b c d e f g] ->
+                              Set.Set (Dmsg a b c d e f g) ->
+                                [Dmsg a b c d e f g];
 filter_buildable xs ms =
   concatMap (\ x -> (if buildable x ms then [x] else [])) xs;
 

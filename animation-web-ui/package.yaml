@@ -46,6 +46,7 @@ dependencies:
 - random
 - nspk3-animator
 - nswj3-animator
+- dhwj-animator
 - serversession 
 - serversession-backend-persistent
 - serversession-backend-acid-state >= 1.0.5

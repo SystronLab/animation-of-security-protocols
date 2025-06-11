@@ -49,6 +49,7 @@ import Handler.Home
 import Handler.AnimateNSPK3 as AnimateNSPK3
 import Handler.AnimateNSLPK3 as AnimateNSLPK3
 import Handler.AnimateNSWJ3 as AnimateNSWJ3
+import Handler.AnimateDHWJ as AnimateDHWJ
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the

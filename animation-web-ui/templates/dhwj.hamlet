@@ -4,9 +4,9 @@
         <div .row>
             <div .col-lg-12>
                 <div .page-header>
-                    <h1> Needham-Schroeder Protocol based on Physical Layer Security using Watermarking and Jamming (WBPLSec)
+                    <h1> Diffie-Hellman Key Exchange Protocol based on Physical Layer Security using Watermarking and Jamming (WBPLSec)
                    
-                    <p> This is a variant of the Needham-Schroeder Protocol which is based on Physical Layer Security using Watermarking and Jamming (WBPLSec). 
+                    <p> This is a variant of the Diffie-Hellman Key Exchange Protocol which is based on Physical Layer Security using Watermarking and Jamming (WBPLSec). 
                         See <a href="https://doi.org/10.1002/ett.3142">this paper from Simone Soderi et al.</a> and 
                         <a href="https://doi.org/10.1016/j.cose.2023.103133">this paper from Gabriele Costa et al.</a> for more details.
 
@@ -21,7 +21,7 @@
                         Jammer-Eavesdropper (JE).
 
                     <p> 
-                        ^{nswj3_diagram}
+                        ^{dhwj_diagram}
 
                         Three-message version of the Needham-Schroeder protocol.
 
@@ -78,7 +78,7 @@
         <div .row>
             <div .col-lg-3>
                 <div .bs-callout bs-callout-info well>
-                    <form .form-horizontal method=post action=@{AnimateNSWJ3R}#animation_forms enctype=#{manFormEnctype}>
+                    <form .form-horizontal method=post action=@{AnimateDHWJR}#animation_forms enctype=#{manFormEnctype}>
                         ^{manFormWidget}
 
                         <button .btn.btn-primary type="animate">
@@ -86,14 +86,14 @@
 
             <div .col-lg-2>
                 <div .bs-callout bs-callout-info well>
-                    <form .form-horizontal method=post action=@{AnimateNSWJ3ResetR}#animation_forms>
+                    <form .form-horizontal method=post action=@{AnimateDHWJResetR}#animation_forms>
 
                         <button .btn.btn-primary type="submit">
                             Reset. 
 
             <div .col-lg-7>
                 <div .bs-callout bs-callout-info well>
-                    <form .form-horizontal method=post action=@{ChangeNSWJ3ProtocolR} enctype=#{eveFormEnctype}>
+                    <form .form-horizontal method=post action=@{ChangeDHWJProtocolR} enctype=#{eveFormEnctype}>
                         ^{eveFormWidget}
                             
             <!-- 
@@ -125,7 +125,7 @@
         <div .row>
             <div .col-lg-9>
                 <div .bs-callout bs-callout-info well>
-                    <form .form-horizontal method=post action=@{AnimateNSWJ3AutoR} enctype=#{autoFormEnctype}>
+                    <form .form-horizontal method=post action=@{AnimateDHWJAutoR} enctype=#{autoFormEnctype}>
                         ^{autoFormWidget}
 
             <div .col-lg-12>
@@ -148,7 +148,7 @@
                                 <td> #{show id}
                                 <td> #{show eventList}
                                 <td>
-                                  <form method=POST action=@{ViewNSWJ3CounterExampleR id}>
+                                  <form method=POST action=@{ViewDHWJCounterExampleR id}>
                                     <button .btn .btn-info type=submit>
                                       View diagram #
                                       <i .glyphicon .glyphicon-refresh>

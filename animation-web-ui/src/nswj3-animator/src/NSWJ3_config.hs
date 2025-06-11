@@ -20,7 +20,7 @@ import qualified Arith;
 import qualified Sec_Messages;
 import qualified Type_Length;
 
-data Deve = Eve1 | Eve2 | Eve3 deriving (Prelude.Read, Prelude.Show);
+data Deve = Eve1 | Eve2 | Eve3 | Eve4 deriving (Prelude.Read, Prelude.Show);
 
 mkbma ::
   forall a b c d e.
@@ -28,7 +28,8 @@ mkbma ::
       Type_Length.Len e) => Sec_Messages.Dagent
                               (Numeral_Type.Bit0 Numeral_Type.Num1) ->
                               Sec_Messages.Dmsg a b c d e
-                                (Numeral_Type.Bit1 Numeral_Type.Num1);
+                                (Numeral_Type.Bit1 Numeral_Type.Num1)
+                                (Numeral_Type.Bit0 Numeral_Type.Num1);
 mkbma a =
   Sec_Messages.MBitm
     (Interaction_Trees.pfun_app
@@ -36,11 +37,13 @@ mkbma a =
         (Interaction_Trees.pfun_upd
           (Interaction_Trees.pfun_upd Interaction_Trees.bot_pfun
             (Sec_Messages.Agent (FSNat.Nmk Arith.zero_nat))
-            (Sec_Messages.Bm (FSNat.Nmk Arith.zero_nat)))
+            (Sec_Messages.Bm (FSNat.Nmk Arith.zero_nat)
+              (FSNat.Nmk Arith.one_nat)))
           (Sec_Messages.Agent (FSNat.Nmk Arith.one_nat))
-          (Sec_Messages.Bm (FSNat.Nmk Arith.one_nat)))
+          (Sec_Messages.Bm (FSNat.Nmk Arith.one_nat) (FSNat.Nmk Arith.one_nat)))
         Sec_Messages.Intruder
-        (Sec_Messages.Bm (FSNat.Nmk (Arith.nat_of_integer (2 :: Integer)))))
+        (Sec_Messages.Bm (FSNat.Nmk (Arith.nat_of_integer (2 :: Integer)))
+          (FSNat.Nmk Arith.one_nat)))
       a);
 
 initKnows ::
@@ -48,7 +51,8 @@ initKnows ::
      (Numeral_Type.Bit0 (Numeral_Type.Bit0 Numeral_Type.Num1))
      (Numeral_Type.Bit0 (Numeral_Type.Bit0 Numeral_Type.Num1))
      (Numeral_Type.Bit0 (Numeral_Type.Bit0 Numeral_Type.Num1)) Numeral_Type.Num1
-     (Numeral_Type.Bit1 Numeral_Type.Num1)];
+     (Numeral_Type.Bit1 Numeral_Type.Num1)
+     (Numeral_Type.Bit0 Numeral_Type.Num1)];
 initKnows =
   Sec_Messages.agentsLst
     [Sec_Messages.Agent (FSNat.Nmk Arith.zero_nat),
@@ -117,52 +121,62 @@ initKnows =
         ((Interaction_Trees.pfun_app ::
            Interaction_Trees.Pfun
              (Sec_Messages.Dagent (Numeral_Type.Bit0 Numeral_Type.Num1))
-             (Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1)) ->
+             (Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1)
+               (Numeral_Type.Bit0 Numeral_Type.Num1)) ->
              Sec_Messages.Dagent (Numeral_Type.Bit0 Numeral_Type.Num1) ->
-               Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1))
+               Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1)
+                 (Numeral_Type.Bit0 Numeral_Type.Num1))
           ((Interaction_Trees.pfun_upd ::
              Interaction_Trees.Pfun
                (Sec_Messages.Dagent (Numeral_Type.Bit0 Numeral_Type.Num1))
-               (Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1)) ->
+               (Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1)
+                 (Numeral_Type.Bit0 Numeral_Type.Num1)) ->
                Sec_Messages.Dagent (Numeral_Type.Bit0 Numeral_Type.Num1) ->
-                 Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1) ->
+                 Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1)
+                   (Numeral_Type.Bit0 Numeral_Type.Num1) ->
                    Interaction_Trees.Pfun
                      (Sec_Messages.Dagent (Numeral_Type.Bit0 Numeral_Type.Num1))
                      (Sec_Messages.Dbitmask
-                       (Numeral_Type.Bit1 Numeral_Type.Num1)))
+                       (Numeral_Type.Bit1 Numeral_Type.Num1)
+                       (Numeral_Type.Bit0 Numeral_Type.Num1)))
             ((Interaction_Trees.pfun_upd ::
                Interaction_Trees.Pfun
                  (Sec_Messages.Dagent (Numeral_Type.Bit0 Numeral_Type.Num1))
-                 (Sec_Messages.Dbitmask
-                   (Numeral_Type.Bit1 Numeral_Type.Num1)) ->
+                 (Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1)
+                   (Numeral_Type.Bit0 Numeral_Type.Num1)) ->
                  Sec_Messages.Dagent (Numeral_Type.Bit0 Numeral_Type.Num1) ->
-                   Sec_Messages.Dbitmask
-                     (Numeral_Type.Bit1 Numeral_Type.Num1) ->
+                   Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1)
+                     (Numeral_Type.Bit0 Numeral_Type.Num1) ->
                      Interaction_Trees.Pfun
                        (Sec_Messages.Dagent
                          (Numeral_Type.Bit0 Numeral_Type.Num1))
                        (Sec_Messages.Dbitmask
-                         (Numeral_Type.Bit1 Numeral_Type.Num1)))
+                         (Numeral_Type.Bit1 Numeral_Type.Num1)
+                         (Numeral_Type.Bit0 Numeral_Type.Num1)))
               ((Interaction_Trees.pfun_upd ::
                  Interaction_Trees.Pfun
                    (Sec_Messages.Dagent (Numeral_Type.Bit0 Numeral_Type.Num1))
-                   (Sec_Messages.Dbitmask
-                     (Numeral_Type.Bit1 Numeral_Type.Num1)) ->
+                   (Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1)
+                     (Numeral_Type.Bit0 Numeral_Type.Num1)) ->
                    Sec_Messages.Dagent (Numeral_Type.Bit0 Numeral_Type.Num1) ->
-                     Sec_Messages.Dbitmask
-                       (Numeral_Type.Bit1 Numeral_Type.Num1) ->
+                     Sec_Messages.Dbitmask (Numeral_Type.Bit1 Numeral_Type.Num1)
+                       (Numeral_Type.Bit0 Numeral_Type.Num1) ->
                        Interaction_Trees.Pfun
                          (Sec_Messages.Dagent
                            (Numeral_Type.Bit0 Numeral_Type.Num1))
                          (Sec_Messages.Dbitmask
-                           (Numeral_Type.Bit1 Numeral_Type.Num1)))
+                           (Numeral_Type.Bit1 Numeral_Type.Num1)
+                           (Numeral_Type.Bit0 Numeral_Type.Num1)))
                 Interaction_Trees.bot_pfun
                 (Sec_Messages.Agent (FSNat.Nmk Arith.zero_nat))
-                (Sec_Messages.Bm (FSNat.Nmk Arith.zero_nat)))
+                (Sec_Messages.Bm (FSNat.Nmk Arith.zero_nat)
+                  (FSNat.Nmk Arith.one_nat)))
               (Sec_Messages.Agent (FSNat.Nmk Arith.one_nat))
-              (Sec_Messages.Bm (FSNat.Nmk Arith.one_nat)))
+              (Sec_Messages.Bm (FSNat.Nmk Arith.one_nat)
+                (FSNat.Nmk Arith.one_nat)))
             Sec_Messages.Intruder
-            (Sec_Messages.Bm (FSNat.Nmk (Arith.nat_of_integer (2 :: Integer)))))
+            (Sec_Messages.Bm (FSNat.Nmk (Arith.nat_of_integer (2 :: Integer)))
+              (FSNat.Nmk Arith.one_nat)))
           Sec_Messages.Intruder)];
 
 allSecrets ::
@@ -170,7 +184,8 @@ allSecrets ::
      (Numeral_Type.Bit0 (Numeral_Type.Bit0 Numeral_Type.Num1))
      (Numeral_Type.Bit0 (Numeral_Type.Bit0 Numeral_Type.Num1))
      (Numeral_Type.Bit0 (Numeral_Type.Bit0 Numeral_Type.Num1)) Numeral_Type.Num1
-     (Numeral_Type.Bit1 Numeral_Type.Num1)];
+     (Numeral_Type.Bit1 Numeral_Type.Num1)
+     (Numeral_Type.Bit0 Numeral_Type.Num1)];
 allSecrets =
   List.removeAll
     (Sec_Messages.MNon
@@ -261,12 +276,19 @@ allOtherAgentsa a =
       Sec_Messages.Agent (FSNat.Nmk Arith.one_nat), Sec_Messages.Intruder];
 
 equal_deve :: Deve -> Deve -> Bool;
+equal_deve Eve3 Eve4 = False;
+equal_deve Eve4 Eve3 = False;
+equal_deve Eve2 Eve4 = False;
+equal_deve Eve4 Eve2 = False;
 equal_deve Eve2 Eve3 = False;
 equal_deve Eve3 Eve2 = False;
+equal_deve Eve1 Eve4 = False;
+equal_deve Eve4 Eve1 = False;
 equal_deve Eve1 Eve3 = False;
 equal_deve Eve3 Eve1 = False;
 equal_deve Eve1 Eve2 = False;
 equal_deve Eve2 Eve1 = False;
+equal_deve Eve4 Eve4 = True;
 equal_deve Eve3 Eve3 = True;
 equal_deve Eve2 Eve2 = True;
 equal_deve Eve1 Eve1 = True;
