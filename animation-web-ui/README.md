@@ -22,6 +22,8 @@ stack exec -- yesod devel
 
 As your code changes, your site will be automatically recompiled and redeployed to localhost.
 
+Then type [http://localhost:3000](http://localhost:3000) in your browser to access the web interface.
+
 ## Tests
 
 ```
@@ -29,3 +31,11 @@ stack test --flag animation-web-ui:library-only --flag animation-web-ui:dev
 ```
 
 (Because `yesod devel` passes the `library-only` and `dev` flags, matching those flags means you don't need to recompile between tests and development, and it disables optimization to speed up your test compile times).
+
+## Deployment
+```
+stack build 
+```
+Then copy the binary file animate-web-ui to a folder which you want.
+
+Then type [http://localhost:3000](http://localhost:3000) in your browser to access the web interface.

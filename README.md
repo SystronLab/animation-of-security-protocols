@@ -5,6 +5,7 @@ This repository contains our work to use sound animation (automatically generate
 - [What's included in the repo?](#whats-included-in-the-repo)
   - [Early stage (first user-guided sound framework)](#early-stage-first-user-guided-sound-framework)
   - [Second stage (generic and general framework)](#second-stage-generic-and-general-framework)
+    - [Web interface](#web-interface)
 - [How to load theories in Isabelle/HOL and generate Haskell code?](#how-to-load-theories-in-isabellehol-and-generate-haskell-code)
 - [How to run animators](#how-to-run-animators)
 - [Illustrations](#illustrations)
@@ -16,51 +17,57 @@ This repository contains our work to use sound animation (automatically generate
 The folder structure is shown below.
 
 ```
-└── User_Guided_Verification_Security
-    ├── CSP_operators.thy
-    ├── Diffie_Hellman
-    │   ├── DH_v1
-    │   │   ├── DH.thy
-    │   │   ├── DH_animation.thy
-    │   │   ├── DH_message.thy
-    │   │   └── DH_sign.thy
-    │   ├── DH_v2
-    │   │   ├── Animation
-    │   │   ├── BADH.thy
-    │   │   ├── DH.thy
-    │   │   └── DH_config.thy
-    │   └── DH_wbplsec_v3
-    │       ├── DH_config.thy
-    │       └── DH_wbplsec.thy
-    ├── FSNat.thy
-    ├── NSPKP
-    │   ├── NSPK3
-    │   │   ├── NSPK3.thy
-    │   │   ├── NSPK3_animation.thy
-    │   │   └── NSPK3_message.thy
-    │   ├── NSPK3_v2
-    │   │   ├── NSLPK3.thy
-    │   │   ├── NSPK3.thy
-    │   │   └── NSPK3_config.thy
-    │   ├── NSPK7
-    │   │   ├── NSPK7.thy
-    │   │   ├── NSPK7_animation.thy
-    │   │   └── NSPK7_message.thy
-    │   ├── NSPK7_v2
-    │   │   ├── NSPK7.thy
-    │   │   └── NSPK7_config.thy
-    │   └── NSPK3_wbplsec_v3
-    │       ├── NSWJ3_config.thy
-    │       ├── NSWJ3_wbplsec.thy
-    │       └── wbpls.drawio
-    ├── ROOT
-    ├── Sec_Animation.thy
-    ├── Sec_Messages.thy
-    └── document
-        └── root.tex
+├── User_Guided_Verification_Security
+│   ├── CSP_operators.thy
+│   ├── Diffie_Hellman
+│   │   ├── DH_v1
+│   │   │   ├── Animator_DH
+│   │   │   ├── Animator_DH_sign
+│   │   │   ├── DH.thy
+│   │   │   ├── DH_animation.thy
+│   │   │   ├── DH_message.thy
+│   │   │   └── DH_sign.thy
+│   │   ├── DH_v2
+│   │   │   ├── Animation
+│   │   │   ├── BADH.thy
+│   │   │   ├── DH.thy
+│   │   │   └── DH_config.thy
+│   │   └── DH_wbplsec_v3
+│   │       ├── DHWJ_config.thy
+│   │       └── DHWJ_wbplsec.thy
+│   ├── FSNat.thy
+│   ├── NSPKP
+│   │   ├── NSPK3
+│   │   │   ├── Animator_NSLPK3
+│   │   │   ├── Animator_NSPK3
+│   │   │   ├── NSPK3.thy
+│   │   │   ├── NSPK3_animation.thy
+│   │   │   └── NSPK3_message.thy
+│   │   ├── NSPK3_v2
+│   │   │   ├── NSLPK3.thy
+│   │   │   ├── NSPK3.thy
+│   │   │   └── NSPK3_config.thy
+│   │   ├── NSPK3_wbplsec_v3
+│   │   │   ├── NSWJ3_config.thy
+│   │   │   ├── NSWJ3_wbplsec.thy
+│   │   │   └── wbpls.drawio
+│   │   ├── NSPK7
+│   │   │   ├── Animator
+│   │   │   ├── NSPK7.thy
+│   │   │   ├── NSPK7_animation.thy
+│   │   │   └── NSPK7_message.thy
+│   │   └── NSPK7_v2
+│   │       ├── NSPK7.thy
+│   │       └── NSPK7_config.thy
+│   ├── ROOT
+│   ├── Sec_Animation.thy
+│   └── Sec_Messages.thy
+└── animation-web-ui
 ```
 
-In general, this repository contains Isabelle/HOL theories to be used to automatically generate Haskell code for sound animation to verify security protocols. Now, the repository contains several variants of the Needham-Schroeder Public Key Protocol (NSPK) and the Diffie–Hellman Key Exchange Protocol (DH) using the framework we are developing. These examples were developed in different stages.
+In general, this repository contains Isabelle/HOL theories in the folder `User_Guided_Verification_Security` to be used to automatically generate Haskell code for sound animation to verify security protocols and the web application in the folder `animation-web-ui`. 
+
+Now, the repository contains several variants of the Needham-Schroeder Public Key Protocol (NSPK) and the Diffie–Hellman Key Exchange Protocol (DH) using the framework we are developing. These examples were developed in different stages.
 
 ## Early stage (first user-guided sound framework)
 The theoretical background is presented in our SEFM2024 paper: ["User-Guided Verification of Security Protocols via Sound Animation"](https://doi.org/10.1007/978-3-031-77382-2_3).
@@ -100,11 +107,13 @@ The two variants of DH (the classic DH and DH based on digital signature) and th
 + [NSPK7](./User_Guided_Verification_Security/NSPKP/NSPK7_v2)
 
 Additionally, we modelled and verified one variant of NSPK3 (NSWJ3) and one variant of DH (DHWJ) based on the PLS. 
-+ [DHWJ](./User_Guided_Verification_Security/Diffie_Hellman/DH_wbplsec_v3/DH_wbplsec.thy)
++ [DHWJ](./User_Guided_Verification_Security/Diffie_Hellman/DH_wbplsec_v3/DHWJ_wbplsec.thy)
 + [NSWJ3](./User_Guided_Verification_Security/NSPKP/NSPK3_wbplsec_v3/NSWJ3_wbplsec.thy)
 
 We found DHWJ and NSWJ3 preserve confidentiality and authenticity if the PLS is properly set up (to ensure eavesdroppers within the jamming ranges of legitimate receivers, for example, through visible light communication, VLC, and reconfigurable intelligent interface, RIS, to restrict spatially within walls or direct signals) though the original NSPK3 and classic DH are subject to the man-in-the-middle attack. Our work suggests PLS can be integrated with the traditional cryptography to provide flexible and lightweight security.
 
+### Web interface
+This is under the folder  `animation-web-ui`, which is developed using the Yesod web framework based on Haskell.
 
 # How to load theories in Isabelle/HOL and generate Haskell code?
 - Step 1: install the patched Isabelle/HOL from the [Isabelle/UTP website](https://isabelle-utp.york.ac.uk/download) to get it ready for the development using Isabelle/UTP

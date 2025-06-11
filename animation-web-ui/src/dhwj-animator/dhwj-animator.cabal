@@ -1,0 +1,142 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.37.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           dhwj-animator
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/RandallYe/dhwj-animator#readme>
+homepage:       https://github.com/RandallYe/dhwj-animator#readme
+bug-reports:    https://github.com/RandallYe/dhwj-animator/issues
+author:         Kangfeng Ye
+maintainer:     kangfeng.ye@york.ac.uk
+copyright:      2024 Kangfeng Ye
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/RandallYe/dhwj-animator
+
+library
+  exposed-modules:
+      AList
+      Arith
+      Channel_Type
+      Countable
+      CSP_operators
+      DH_config
+      DH_wbplsec
+      DHWJ_Animate
+      DHWJ_config
+      DHWJ_wbplsec
+      Finite_Set
+      FSNat
+      HOL
+      Interaction_Trees
+      ITree_Choice
+      ITree_CSP
+      ITree_Iteration
+      ITree_Parallel
+      List
+      Map
+      Numeral_Type
+      Option
+      Orderings
+      Prisms
+      Product_Type
+      Rational
+      Sec_Messages
+      Set
+      Simulate
+      Type_Length
+      Typerep
+  other-modules:
+      Paths_dhwj_animator
+  autogen-modules:
+      Paths_dhwj_animator
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fno-warn-unused-binds -fno-warn-unused-matches
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , case-insensitive
+    , classy-prelude ==1.5.*
+    , classy-prelude-conduit ==1.5.*
+    , containers
+    , data-default
+    , directory >=1.1 && <1.4
+    , http-client-tls ==0.3.*
+    , http-conduit ==2.3.*
+    , pretty-show
+    , random
+    , text
+    , time
+    , unordered-containers
+    , vector
+  default-language: Haskell2010
+
+executable dhwj-animator-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_dhwj_animator
+  autogen-modules:
+      Paths_dhwj_animator
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fno-warn-unused-binds -fno-warn-unused-matches -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , case-insensitive
+    , classy-prelude ==1.5.*
+    , classy-prelude-conduit ==1.5.*
+    , containers
+    , data-default
+    , dhwj-animator
+    , directory >=1.1 && <1.4
+    , http-client-tls ==0.3.*
+    , http-conduit ==2.3.*
+    , pretty-show
+    , random
+    , text
+    , time
+    , unordered-containers
+    , vector
+  default-language: Haskell2010
+
+test-suite dhwj-animator-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_dhwj_animator
+  autogen-modules:
+      Paths_dhwj_animator
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fno-warn-unused-binds -fno-warn-unused-matches -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , case-insensitive
+    , classy-prelude ==1.5.*
+    , classy-prelude-conduit ==1.5.*
+    , containers
+    , data-default
+    , dhwj-animator
+    , directory >=1.1 && <1.4
+    , http-client-tls ==0.3.*
+    , http-conduit ==2.3.*
+    , pretty-show
+    , random
+    , text
+    , time
+    , unordered-containers
+    , vector
+  default-language: Haskell2010
